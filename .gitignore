@@ -1,2 +1,5 @@
-.idea
 *.zip
+*.log
+.idea
+node_modules/
+build/
