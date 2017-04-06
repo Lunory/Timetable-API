@@ -1,0 +1,33 @@
+{
+  "name": "Timetable",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Расписание лекций",
+  "devDependencies": {
+    "autoprefixer": "6.7.x",
+    "browser-sync": "2.18.8",
+    "css-mqpacker": "^5.0.1",
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-imagemin": "^3.2.0",
+    "gulp-jsmin": "^0.1.5",
+    "gulp-plumber": "1.1.0",
+    "gulp-postcss": "6.3.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-util": "^3.0.8",
+    "postcss-css-variables": "^0.6.0",
+    "postcss-custom-media": "^5.0.1",
+    "postcss-import": "^9.1.0",
+    "postcss-nested": "^1.0.0",
+    "run-sequence": "^1.2.2"
+  },
+  "scripts": {
+    "test": "editorconfig-cli",
+    "build": "gulp build",
+    "start": "npm run build && gulp serve"
+  },
+  "engines": {
+    "node": "6.10"
+  }
+}
