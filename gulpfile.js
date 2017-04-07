@@ -85,7 +85,7 @@ gulp.task('copy', function() {
 
 //Server
 gulp.task('html:copy', function() {
-  return gulp.src('*.html')
+  return gulp.src('src/*.html')
     .pipe(gulp.dest('build'));
 });
 
@@ -104,7 +104,7 @@ gulp.task('serve', function() {
   });
 
   gulp.watch('src/postcss/**/*.css', ['style']);
-  gulp.watch('*.html', ['html:update']);
+  gulp.watch('src/*.html', ['html:update']);
 });
 
 //Run
