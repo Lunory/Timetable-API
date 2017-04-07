@@ -1,0 +1,57 @@
+.timetable {
+
+	&__item {
+		outline: 3px solid #60c0f3;
+		width: 100%;
+		margin-bottom: 10px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&__head {
+		display: flex;
+		justify-content: space-between;
+		padding: 10px;
+	}
+
+	&__body {
+
+	}
+
+	&__inner {
+		padding: 10px;
+
+		@media (--tablet-width) {
+			display: flex;
+		}
+	}
+
+	&__column {
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__subject {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 10px;
+	}
+
+	&__place {
+		margin: 0;
+		margin-bottom: 10px;
+	}
+
+	&__status {
+		display: inline-block;
+		width: 100%;
+		margin: 0;
+
+		@media (--tablet-width) {
+			width: auto;
+		}
+	}
+
+}

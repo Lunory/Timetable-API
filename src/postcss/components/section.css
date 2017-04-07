@@ -1,0 +1,6 @@
+.section {
+
+	&__wrap {
+		padding: 10px;
+	}
+}
