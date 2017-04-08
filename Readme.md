@@ -15,7 +15,7 @@ $ cd project
 $ npm install
 ```
 
-##Запуск проекта
+## Запуск проекта
 
 ```bash
 $ npm start
