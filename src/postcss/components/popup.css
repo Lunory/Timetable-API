@@ -1,0 +1,60 @@
+.popup {
+	display: none;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: var(--color-white);
+	z-index: 3;
+	
+	@media (--tablet-width) {
+
+		top: 25%;
+		bottom: auto;
+		left: 50%;
+		margin-left: -160px;
+		width: 450px;
+		box-shadow: 0 6px 9px #cecece;
+	}
+
+	&--open {
+		display: block;
+	}
+
+	&__wrap {
+		position: relative;
+		padding: 20px;
+		padding-top: 45px;
+		text-align: center;
+
+		@media (--tablet-width) {
+			padding: 30px;
+			padding-top: 45px;
+		}
+	}
+
+	&__icon-close {
+		position: absolute;
+		right: 15px;
+		top: 15px;
+	}
+
+	&__row {
+		margin-bottom: 15px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&__header {
+		font-size: 24px;
+	}
+
+	&__image {
+
+	}
+
+
+
+}

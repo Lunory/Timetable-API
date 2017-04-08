@@ -4,8 +4,11 @@
 @import "variables.css";
 
 @import "components/page.css";
+@import "components/button.css";
 @import "components/header.css";
+@import "components/text.css";
 @import "components/link.css";
+@import "components/popup.css";
 @import "components/main-content.css";
 @import "components/section.css";
 @import "components/timetable.css";
