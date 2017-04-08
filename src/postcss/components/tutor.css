@@ -1,0 +1,27 @@
+.tutor {
+	margin-top: 20px;
+	@media (--tablet-width) {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	&__photo {
+		display: block;
+		margin: auto;
+
+		@media (--tablet-width) {
+			margin: 0;
+		}
+	}
+
+	&__about {
+		margin: auto;
+		padding: 20px;
+		text-align: center;
+
+		@media (--tablet-width) {
+			margin: 0;
+			text-align: left;
+		}
+	}
+}
