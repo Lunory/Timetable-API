@@ -94,6 +94,16 @@ gulp.task('html:update', ['html:copy'], function(done) {
   done();
 });
 
+gulp.task('js:copy', function() {
+  return gulp.src('src/js/**/*.js')
+    .pipe(gulp.dest('build/js'));
+});
+
+gulp.task('js:update', ['js:copy'], function(done) {
+  server.reload();
+  done();
+});
+
 gulp.task('serve', function() {
   server.init({
     server: 'build/',
@@ -104,6 +114,7 @@ gulp.task('serve', function() {
   });
 
   gulp.watch('src/postcss/**/*.css', ['style']);
+  gulp.watch('src/js/**/*.js', ['js:update']);
   gulp.watch('src/*.html', ['html:update']);
 });
 
