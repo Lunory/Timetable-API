@@ -1,6 +1,6 @@
 :root {
 
-	--bg-white: #ffffff;
+	--color-white: #ffffff;
 
 	--color-text: #000000;
 
@@ -10,5 +10,5 @@
 	--font-family: "Open Sans", "Arial", sans-serif;
 
 
-	@custom-media --tablet-width (min-width: 800px);
+	@custom-media --tablet-width (min-width: 900px);
 }

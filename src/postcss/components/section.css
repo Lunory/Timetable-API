@@ -2,5 +2,18 @@
 
 	&__wrap {
 		padding: 10px;
+
+		@media (--tablet-width) {
+			padding: 30px;
+		}
+	}
+
+	&__header {
+		text-align: center;
+		margin-bottom: 15px;
+
+		@media (--tablet-width) {
+			margin-bottom: 35px;
+		}
 	}
 }
