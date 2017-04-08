@@ -24,4 +24,15 @@
 			text-align: left;
 		}
 	}
+
+	&__name {
+		margin-bottom: 20px;
+	}
+
+	&__text {
+
+		@media (--tablet-width) {
+			font-size: var(--font-size-md);
+		}
+	}
 }
