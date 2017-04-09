@@ -6,13 +6,16 @@
 	width: 100%;
 	background-color: var(--color-white);
 	z-index: 3;
+	overflow: auto;
+	max-height: 100%;
 	
 	@media (--tablet-width) {
 
-		top: 25%;
+		top: 15%;
 		bottom: auto;
 		left: 50%;
-		margin-left: -160px;
+		max-height: 60%;
+		margin-left: -225px;
 		width: 450px;
 		box-shadow: 0 6px 9px #cecece;
 	}

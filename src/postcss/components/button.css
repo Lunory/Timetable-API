@@ -3,6 +3,7 @@
 	border: none;
 	background-color: transparent;
 	line-height: 0;
+	cursor: pointer;
 
 	&:focus {
 		outline: none;
