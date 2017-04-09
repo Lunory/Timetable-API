@@ -1,3 +1,13 @@
+/*
+У меня было 2 варианта, с помощью чего реализовать всплывающее окно.
+Первый - без JS, с помощью чекбоксов, второй - с JS.
+Чекбоксы плохо расширяемы (нужно хранить всплывающее окно для каждого учителя),
+и ухудшают читабельность разметки (каждый преподаватель был бы обернут в label с сheckbox'ом).
+С JS легко можно расширять функционал. Например, в данном проекте информация
+об учителе подставляется во всплывающее окно.
+Разметка не захламлена (в конце index.html добавлен блок (popup),
+в который мы подставляем нужную информацию).
+*/
 'use strict';
 
 var page = document.querySelector('.page');
@@ -9,7 +19,7 @@ var popupTitle = popup.querySelector('.popup__header');
 var popupText = popup.querySelector('.popup__text');
 var popupImg = popup.querySelector('.popup__img');
 
-//Данные для отображения информации об учителях в сплывающем окне
+// Данные для отображения информации об учителях во всплывающем окне
 var tutorsData = {
     1 : {
       name: 'Антон Тен',
@@ -34,7 +44,7 @@ var tutorsData = {
 var openPopup = function () {
   event.preventDefault();
 
-  //Обновление информации во всплывающем окне
+  // Обновление информации во всплывающем окне
   var idTutor = this.getAttribute('data-tutor');
   popupTitle.innerText = tutorsData[idTutor].name;
   popupText.innerText = tutorsData[idTutor].text;
@@ -60,7 +70,7 @@ if (tutor.length > 0) {
   }
 }
 
-// Вешаем обработчик события на крестик popup__icon-close
+// Вешаем обработчик события "клик" на крестик popup__icon-close
 if (btnClose) {
   btnClose.addEventListener('click', closePopup);
 }
