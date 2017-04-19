@@ -50,7 +50,8 @@ gulp.task('style', function() {
 
 //Concat JS
 gulp.task('scripts', function() {
-  return gulp.src('src/js/timetable/*.js')
+  return gulp.src(['src/js/timetable/utility.js', 'src/js/timetable/tutor.js', 'src/js/timetable/school.js',
+    'src/js/timetable/classRoom.js', 'src/js/timetable/lecture.js', 'src/js/timetable/interface.js'])
     .pipe(concat('timetableAPI.js'))
     .pipe(gulp.dest('build/js'));
 });
