@@ -5,7 +5,6 @@ var plumber = require('gulp-plumber');
 var del = require('del');
 var server = require('browser-sync').create();
 var run = require('run-sequence');
-var del = require('del');
 
 //Minification
 var cssNano = require('gulp-cssnano');
@@ -15,6 +14,9 @@ var imagemin = require('gulp-imagemin');
 //Rename
 var rename = require('gulp-rename');
 
+//Concatenate js
+var concat = require('gulp-concat');
+
 //PostCSS plugins
 var postcss = require('gulp-postcss');
 var autoprefixer = require('autoprefixer');
@@ -23,7 +25,6 @@ var atImport = require('postcss-import');
 var mqpacker = require('css-mqpacker');
 var customMedia = require('postcss-custom-media');
 var cssVariables = require('postcss-css-variables');
-
 
 //Style
 gulp.task('style', function() {
@@ -47,7 +48,14 @@ gulp.task('style', function() {
     .pipe(gulp.dest('build/css'));
 });
 
-//JS
+//Concat JS
+gulp.task('scripts', function() {
+  return gulp.src('src/js/timetable/*.js')
+    .pipe(concat('timetableAPI.js'))
+    .pipe(gulp.dest('build/js'));
+});
+
+//min js
 gulp.task('js', function() {
   return gulp.src('build/js/*.js')
     .pipe(jsMin())
@@ -75,7 +83,7 @@ gulp.task('copy', function() {
   return gulp.src([
     'src/fonts/**/*.{woff,woff2}',
     'src/img/**',
-    'src/js/**',
+    'src/js/*.js',
     'src/*.html'
   ], {
     base: './src'
@@ -120,5 +128,5 @@ gulp.task('serve', function() {
 
 //Run
 gulp.task('build', function(done) {
-  run('clean', 'copy', 'style', 'js', 'images', done)
+  run('clean', 'copy', 'style', 'scripts', 'js', 'images', done)
 });
