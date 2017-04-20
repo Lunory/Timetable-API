@@ -4,15 +4,15 @@ function ClassRoom (id, name, capacity, location) {
   this.capacity = capacity;
   this.location = location;
 
-  this.editName = function(newName) {
+  this.setName = function(newName) {
     this.name = newName;
   };
 
-  this.editCapacity = function (newCapacity) {
+  this.setCapacity = function (newCapacity) {
     this.capacity = newCapacity;
   };
 
-  this.editLocation = function (newLocation) {
+  this.setLocation = function (newLocation) {
     this.location = newLocation;
   };
 
@@ -23,9 +23,9 @@ function ClassRoom (id, name, capacity, location) {
 
 var classRoomCollection = {
 
-  collection : Object.create(null),
+  collection: Object.create(null),
 
-  validateName : function (newName) {
+  validateName: function (newName) {
 
     if (typeof newName !== 'string') {
       throw new TimetableError('Имя должно быть строкой');
@@ -36,15 +36,18 @@ var classRoomCollection = {
     }
 
     for (var key in this.collection) {
+
       if (this.collection[key].name === newName) {
         throw new TimetableError('Аудитория с таким именем уже существует');
       }
+
     }
+
   },
 
-  validateCapacity : function (newCapacity) {
+  validateCapacity: function (newCapacity) {
 
-    if (!isNumeric(newCapacity)) {
+    if (!isNaturalNum(newCapacity)) {
       throw new TimetableError('Количество мест в аудитории должно быть числом');
     }
 
@@ -54,7 +57,7 @@ var classRoomCollection = {
 
   },
 
-  validateLocation : function (newLocation) {
+  validateLocation: function (newLocation) {
 
     if (typeof newLocation !== 'string') {
       throw new TimetableError('Месторасположение аудитории должно быть строкой');
@@ -66,51 +69,49 @@ var classRoomCollection = {
 
   },
 
-  getById : function (id) {
+  getById: function (id) {
 
     if (!(this.collection[id] instanceof ClassRoom)) {
       throw new TimetableError('Аудитории с таким id не существует');
     }
 
     return this.collection[id];
-
   },
 
-  editName : function (id, newName) {
-
+  setName: function (id, newName) {
     this.validateName(newName);
-    this.getById(id).editName(newName);
-
+    this.getById(id).setName(newName);
   },
 
-  editCapacity : function (id, newCapacity) {
-
+  setCapacity: function (id, newCapacity) {
     this.validateCapacity(newCapacity);
     var classRoom = this.getById(id);
+
     for (var key in lectureCollection.collection) {
+
       if (lectureCollection.collection[key].classRoom === classRoom) {
         lectureCollection.validateCapacity(lectureCollection.collection[key].schoolList, newCapacity);
       }
+
     }
-    classRoom.editCapacity(newCapacity);
+
+    classRoom.setCapacity(newCapacity);
   },
 
-  editLocation : function (id, newLocation) {
-
+  setLocation: function (id, newLocation) {
     this.validateLocation(newLocation);
-    this.getById(id).editLocation(newLocation);
-
+    this.getById(id).setLocation(newLocation);
   },
 
-  add : function (id, name, capacity, location) {
-
-    validateId(id, this.collection)
+  add: function (id, name, capacity, location) {
+    validateId(id, this.collection);
     this.validateName(name);
     this.validateCapacity(capacity);
     this.validateLocation(location);
 
     this.collection[id] = new ClassRoom(id, name, capacity, location);
 
+    return true;
   }
 
 };

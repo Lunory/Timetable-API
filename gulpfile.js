@@ -50,13 +50,21 @@ gulp.task('style', function() {
 
 //Concat JS
 gulp.task('scripts', function() {
-  return gulp.src(['src/js/timetable/utility.js', 'src/js/timetable/tutor.js', 'src/js/timetable/school.js',
+  return gulp.src(['src/js/timetable/error.js', 'src/js/timetable/utility.js', 'src/js/timetable/tutor.js', 'src/js/timetable/school.js',
     'src/js/timetable/classRoom.js', 'src/js/timetable/lecture.js', 'src/js/timetable/interface.js'])
     .pipe(concat('timetableAPI.js'))
     .pipe(gulp.dest('build/js'));
 });
 
-//min js
+//Concat JS for test
+gulp.task('testScripts', function() {
+  return gulp.src(['src/js/timetable/error.js', 'src/js/timetable/utility.js', 'src/js/timetable/tutor.js', 'src/js/timetable/school.js',
+    'src/js/timetable/classRoom.js', 'src/js/timetable/lecture.js', 'src/js/timetable/interface.js', 'src/test/test.js'])
+    .pipe(concat('test.js'))
+    .pipe(gulp.dest('test/'));
+});
+
+//Min js
 gulp.task('js', function() {
   return gulp.src('build/js/*.js')
     .pipe(jsMin())
@@ -74,10 +82,12 @@ gulp.task('images', function() {
     .pipe(gulp.dest('build/img'));
 });
 
-//Clean
+//Clean build
 gulp.task('clean', function() {
-  return del('build');
+  return del('build'), del('test');
 });
+
+
 
 //Copy
 gulp.task('copy', function() {
@@ -130,4 +140,8 @@ gulp.task('serve', function() {
 //Run
 gulp.task('build', function(done) {
   run('clean', 'copy', 'style', 'scripts', 'js', 'images', done)
+});
+
+gulp.task('buildTest', function(done) {
+  run('clean', 'testScripts', done)
 });

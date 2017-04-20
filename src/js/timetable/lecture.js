@@ -7,66 +7,67 @@ function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   
   this.dateBegin = dateBegin;
   this.dateEnd = dateEnd;
 
-  this.editTutor = function (newTutor) {
+  this.setTutor = function (newTutor) {
     this.tutor = newTutor;
   };
 
-  this.editSchoolList = function (newSchoolList) {
+  this.setSchoolList = function (newSchoolList) {
     this.schoolList = newSchoolList;
   };
 
-  this.editClassRoom = function (newClassList) {
+  this.setClassRoom = function (newClassList) {
     this.classList = newClassList;
   };
 
-  this.editDates = function (newDateBegin, newDateEnd) {
+  this.setDates = function (newDateBegin, newDateEnd) {
     this.dateBegin = newDateBegin;
     this.dateEnd = newDateEnd;
   };
 
-  this.render = function () {
-    var board = document.querySelector('.timetable');
-    var wrap = document.createElement('div');
-    wrap.classList.add('timetable__item');
-
-    var innerHtml =
-      '<div class="timetable__head">' +
-      '<p class="timetable__day">' + getWeekDay(this.dateBegin) + ':</p>' +
-      '<p class="timetable__date">' + getMonth(this.dateBegin) + ', ' + this.dateBegin.getDate().toString() + '</p>' +
-      '</div>' +
-      '<div class="timetable__body">' +
-      '<div class="timetable__inner">' +
-      schoolCollection.getHtml(this.schoolList) +
-      '<div class="timetable__subject">' +
-      '<p class="timetable__subject-theme">' +
-      this.name +
-      '</p>' +
-      this.tutor.getHtml() +
-      '</div>' +
-      this.classRoom.getHtml() +
-      '<a class="timetable__status">с ' + getTime(this.dateBegin) + ' до ' + getTime(this.dateEnd) + '</a>' +
-      '</div>' +
-      '</div>';
-
-    wrap.innerHTML = innerHtml;
-    board.appendChild(wrap);
-
-  };
-
+  //TODO for filters
   this.show = function () {
 
   };
 
-
   this.hide = function () {
 
-  }
+  };
 }
 
-var lectureCollection = {
+Lecture.prototype.render = function () {
+  var board = document.querySelector('.timetable');
+  var wrap = document.createElement('div');
+  wrap.classList.add('timetable__item');
 
+  var innerHtml =
+    '<div class="timetable__head">' +
+      '<p class="timetable__day">' + getWeekDay(this.dateBegin) + ':</p>' +
+      '<p class="timetable__date">' + getMonth(this.dateBegin) + ', ' + this.dateBegin.getDate().toString() + '</p>' +
+    '</div>' +
+    '<div class="timetable__body">' +
+      '<div class="timetable__inner">' +
+        '<div class="timetable__column">' +
+          schoolCollection.getHtml(this.schoolList) +
+        '</div>' +
+        '<div class="timetable__subject">' +
+          '<p class="timetable__subject-theme">' +
+            this.name +
+          '</p>' +
+          this.tutor.getHtml() +
+        '</div>' +
+        this.classRoom.getHtml() +
+        '<a class="timetable__status">с ' + getTime(this.dateBegin) + ' до ' + getTime(this.dateEnd) + '</a>' +
+      '</div>' +
+    '</div>';
+
+  wrap.innerHTML = innerHtml;
+  board.appendChild(wrap);
+};
+
+var lectureCollection = {
   nextId : 0,
   collection : Object.create(null),
+  dayList: [],
 
   getById : function (id) {
 
@@ -75,7 +76,6 @@ var lectureCollection = {
     }
 
     return this.collection[id];
-
   },
 
   validateName : function (newName) {
@@ -89,33 +89,34 @@ var lectureCollection = {
     }
 
   },
-  // TODO во всех выводах дат. выводить их в верном формате
-  validateFreeTutor : function (lecture, tutorId, dateBegin, dateEnd, ignoreLectureId) {
 
+  validateFreeTutor : function (lecture, tutorId, dateBegin, dateEnd, ignoreLectureId) {
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.tutor.id === tutorId && lecture.id !== ignoreLectureId){
+
       if (intersectionDates(dateBegin, dateEnd, lecture.dateBegin, lecture.dateEnd)) {
-        throw new TimetableError('C ' + lecture.dateBegin + ' по ' + lecture.dateEnd + ' преподаватель ' + lecture.tutor.name + ' ведёт лекцию ' + lecture.name);
+        throw new TimetableError('C ' + lecture.dateBegin.toISOString() + ' по ' + lecture.dateEnd.toISOString() + ' преподаватель ' + lecture.tutor.name + ' ведёт лекцию ' + lecture.name);
       }
+
     }
 
   },
 
   validateFreeClassRoom : function (lecture, classRoomId, dateBegin, dateEnd, ignoreLectureId) {
-
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.classRoom.id === classRoomId && lecture.id !== ignoreLectureId) {
+
       if (intersectionDates(dateBegin, dateEnd, lecture.dateBegin, lecture.dateEnd)) {
-        throw new TimetableError('C ' + lecture.dateBegin + ' по ' + lecture.dateEnd + ' в аудитории идет лекция ' + lecture.name);
+        throw new TimetableError('C ' + lecture.dateBegin.toISOString() + ' по ' + lecture.dateEnd.toISOString() + ' в аудитории идет лекция ' + lecture.name);
       }
+
     }
 
   },
 
   validateFreeSchool : function (lecture, schoolList, dateBegin, dateEnd, ignoreLectureId) {
-
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.id === ignoreLectureId) {
@@ -123,17 +124,20 @@ var lectureCollection = {
     }
 
     for (var i = 0; i < lecture.schoolList.length; i++) {
+
       if (schoolList.indexOf(lecture.schoolList[i]) >= 0) {
+
         if (intersectionDates(dateBegin, dateEnd, lecture.dateBegin, lecture.dateEnd)) {
-          throw new TimetableError('C ' + lecture.dateBegin + ' по ' + lecture.dateEnd + ' школа ' + lecture.schoolList[i].name + ' на лекции ' + lecture.name);
+          throw new TimetableError('C ' + lecture.dateBegin.toISOString() + ' по ' + lecture.dateEnd.toISOString() + ' школа ' + lecture.schoolList[i].name + ' на лекции ' + lecture.name);
         }
+
       }
+
     }
 
   },
 
   validateCapacity : function (schoolList, capacity) {
-
     var studentsCount = 0;
 
     for (var i = 0; i < schoolList.length; i++) {
@@ -152,14 +156,19 @@ var lectureCollection = {
       throw new TimetableError('SchoolListId должен быть массивом');
     }
 
+    if (schoolListId.length === 0) {
+      throw new TimetableError('SchoolListId не должен быть пустым массивом');
+    }
+
     var temp = Object.create(null);
 
     for (var i = 0; i < schoolListId.length; i++) {
+
       if (typeof schoolListId[i] !== 'string') {
         throw new TimetableError('SchoolId должен быть строкой');
       }
 
-      if (schoolListId[i] == null) {
+      if (schoolListId[i].length === 0) {
         throw new TimetableError('SchoolId не должен быть пустой строкой');
       }
 
@@ -172,21 +181,7 @@ var lectureCollection = {
 
   },
 
-  validateDates : function (dateBegin, dateEnd) {
-    // TODO VALIDATION INVALID
-    if (dateBegin > dateEnd){
-      // TODO text error
-      throw new TimetableError('Дата начала больше даты конца');
-    }
-  },
-
-  createDate : function (date) {
-    // TODO REGEXP
-    return new Date(date);
-  },
-
   getSchoolList : function (schoolListId) {
-
     var schoolList = [];
 
     for (var i = 0; i < schoolListId.length; i++) {
@@ -194,19 +189,14 @@ var lectureCollection = {
     }
 
     return schoolList;
-
   },
 
-  editName : function (id, newName) {
-
+  setName : function (id, newName) {
     this.validateName(newName);
-
     this.getById(id).name = newName;
-
   },
 
-  editTutor : function (id, tutorId) {
-
+  setTutor : function (id, tutorId) {
     var lecture = this.getById(id);
 
     if (lecture.tutor.id === tutorId){
@@ -219,63 +209,47 @@ var lectureCollection = {
       this.validateFreeTutor(this.collection[key], tutorId, lecture.dateBegin, lecture.dateEnd, lecture.id);
     }
 
-    lecture.editTutor(tutor);
-
+    lecture.setTutor(tutor);
     return true;
-
   },
 
-  editSchoolList : function (id, schoolListId) {
-
+  setSchoolList : function (id, schoolListId) {
     var lecture = this.getById(id);
-
     this.validateSchoolListId(schoolListId);
-
     var schoolList = this.getSchoolList(schoolListId);
-
     this.validateCapacity(schoolList, lecture.classRoom.capacity);
 
     for (var key in this.collection) {
       this.validateFreeSchool(this.collection[key], schoolList, lecture.dateBegin, lecture.dateEnd, lecture.id);
     }
 
-    lecture.editSchoolList(schoolList);
-
+    lecture.setSchoolList(schoolList);
     return true;
-
   },
 
-  editClassRoom : function (id, classRoomId) {
+  setClassRoom : function (id, classRoomId) {
     var lecture = this.getById(id);
-
 
     if (lecture.tutor.id === classRoomId){
       return true;
     }
 
     var classRoom = classRoomCollection.getById(classRoomId);
-
     this.validateCapacity(lecture.schoolList, classRoom.capacity);
 
     for (var key in this.collection) {
       this.validateFreeClassRoom(this.collection[key], classRoomId, lecture.dateBegin, lecture.dateEnd, lecture.id);
     }
 
-    lecture.editClassRoom(classRoom);
-
+    lecture.setClassRoom(classRoom);
     return true;
-
   },
 
-  editDates : function (id, dateBeginStr, dateEndStr) {
-
+  setDates : function (id, dateBeginStr, dateEndStr) {
     var lecture = this.getById(id);
-
-    var dateBegin = this.createDate(dateBeginStr);
-
-    var dateEnd = this.createDate(dateEndStr);
-
-    this.validateDates(dateBegin, dateEnd);
+    var dateBegin = createDate(dateBeginStr);
+    var dateEnd = createDate(dateEndStr);
+    validateDates(dateBegin, dateEnd);
 
     if (lecture.dateBegin === dateBegin || lecture.dateEnd === dateEnd) {
       return true;
@@ -283,18 +257,14 @@ var lectureCollection = {
 
     for (var key in this.collection) {
       this.validateFreeTutor(this.collection[key], lecture.tutor.id, dateBegin, dateEnd);
-
       this.validateFreeClassRoom(this.collection[key], lecture.classRoom.id, dateBegin, dateEnd);
-
       this.validateFreeSchool(this.collection[key], lecture.schoolList, dateBegin, dateEnd);
     }
 
-    lecture.editDates(dateBegin, dateEnd);
-
+    lecture.setDates(dateBegin, dateEnd);
   },
 
   add : function (name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr) {
-
     this.validateName(name);
     var tutor = tutorCollection.getById(tutorId);
     var classRoom = classRoomCollection.getById(classRoomId);
@@ -303,9 +273,9 @@ var lectureCollection = {
     var schoolList = this.getSchoolList(schoolListId);
     this.validateCapacity(schoolList, classRoom.capacity);
 
-    var dateBegin = this.createDate(dateBeginStr);
-    var dateEnd = this.createDate(dateEndStr);
-    this.validateDates(dateBegin, dateEnd);
+    var dateBegin = createDate(dateBeginStr);
+    var dateEnd = createDate(dateEndStr);
+    validateDates(dateBegin, dateEnd);
 
     for (var key in this.collection) {
       this.validateFreeTutor(this.collection[key], tutorId, dateBegin, dateEnd);
@@ -316,39 +286,45 @@ var lectureCollection = {
     this.collection[this.nextId.toString()] = new Lecture (this.nextId.toString(), name, tutor, schoolList, classRoom, dateBegin, dateEnd);
     this.collection[this.nextId.toString()].render();
     this.nextId++;
+
+    return true;
   },
 
   filterBySchoolAndDates : function (schoolId, dateBeginStr, dateEndStr) {
     var school = schoolCollection.getById(schoolId);
 
-    var dateBegin = this.createDate(dateBeginStr);
-    var dateEnd = this.createDate(dateEndStr);
-    this.validateDates(dateBegin, dateEnd);
+    var dateBegin = createDate(dateBeginStr);
+    var dateEnd = createDate(dateEndStr);
+    validateDates(dateBegin, dateEnd);
 
     for (var key in lectureCollection.collection) {
       var lecture = lectureCollection.collection[key];
+
       if ((lecture.dateBegin > dateBegin) && (lecture.dateEnd < dateEnd) && (lecture.schoolList.indexOf(school) >= 0)) {
         lecture.show();
       } else {
         lecture.hide();
       }
+      
     }
   },
 
   filterByClassRoomAndDates : function (classRoomId, dateBeginStr, dateEndStr) {
     var classRoom = classRoomCollection.getById(classRoomId);
 
-    var dateBegin = this.createDate(dateBeginStr);
-    var dateEnd = this.createDate(dateEndStr);
-    this.validateDates(dateBegin, dateEnd);
+    var dateBegin = createDate(dateBeginStr);
+    var dateEnd = createDate(dateEndStr);
+    validateDates(dateBegin, dateEnd);
 
     for (var key in lectureCollection.collection) {
       var lecture = lectureCollection.collection[key];
+
       if ((lecture.dateBegin > dateBegin) && (lecture.dateEnd < dateEnd) && (lecture.classRoom === classRoom)) {
         lecture.show();
       } else {
         lecture.hide();
       }
+
     }
   }
 

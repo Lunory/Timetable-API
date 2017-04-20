@@ -18,9 +18,9 @@ function Tutor (id, name, about, img) {
 
 var tutorCollection = {
 
-  collection : Object.create(null),
+  collection: Object.create(null),
 
-  validateName : function (newName) {
+  validateName: function (newName) {
 
     if (typeof newName !== 'string') {
       throw new TimetableError('Имя должно быть строкой');
@@ -32,7 +32,7 @@ var tutorCollection = {
 
   },
 
-  validateAbout : function (newAbout) {
+  validateAbout: function (newAbout) {
 
     if (typeof newAbout !== 'string') {
       throw new TimetableError('Информация о преподавателе должна быть строкой');
@@ -44,7 +44,7 @@ var tutorCollection = {
 
   },
 
-  getById : function (id) {
+  getById: function (id) {
 
     if (!(this.collection[id] instanceof Tutor)) {
       throw new TimetableError('Преподавателя с таким id не существует');
@@ -53,11 +53,12 @@ var tutorCollection = {
     return this.collection[id];
   },
 
-  add : function (id, name, about, img) {
+  add: function (id, name, about, img) {
     validateId(id, this.collection);
     this.validateName(name);
     this.validateAbout(about);
-    // TODO validate img
     this.collection[id] = new Tutor(id, name, about, img);
+
+    return true;
   }
 };

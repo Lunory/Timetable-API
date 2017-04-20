@@ -7,15 +7,11 @@ function School (id, name, studentsCount) {
     return '<p class="timetable__school">' + this.name +'</p>'
   };
 
-  this.render = function () {
-
-  };
-
-  this.editName = function(newName) {
+  this.setName = function(newName) {
     this.name = newName;
   };
 
-  this.editStudentsCount = function(newStudentsCount) {
+  this.setStudentsCount = function(newStudentsCount) {
     this.studentsCount = newStudentsCount;
   };
 }
@@ -24,7 +20,7 @@ var schoolCollection = {
 
   collection : Object.create(null),
 
-  validateName : function (newName) {
+  validateName: function (newName) {
 
     if (typeof newName !== 'string') {
       throw new TimetableError('Имя должно быть строкой');
@@ -42,9 +38,9 @@ var schoolCollection = {
 
   },
 
-  validateStudentsCount : function (newStudentsCount) {
+  validateStudentsCount: function (newStudentsCount) {
 
-    if (!isNumeric(newStudentsCount)) {
+    if (!isNaturalNum(newStudentsCount)) {
       throw new TimetableError('Количество студентов должно быть числом');
     }
 
@@ -54,29 +50,26 @@ var schoolCollection = {
 
   },
 
-  getById : function (id) {
+  getById: function (id) {
 
     if (!(this.collection[id] instanceof School)) {
       throw new TimetableError('Такого id не существует');
     }
 
     return this.collection[id];
-
   },
 
-  editName : function (id, newName) {
-
+  setName: function (id, newName) {
     this.validateName(newName);
-
-    this.getById(id).editName(newName);
-
+    this.getById(id).setName(newName);
   },
 
-  editStudentsCount : function (id, newStudentsCount) {
+  setStudentsCount: function (id, newStudentsCount) {
     this.validateStudentsCount(newStudentsCount);
-    this.getById(id).editStudentsCount(newStudentsCount);
+    this.getById(id).setStudentsCount(newStudentsCount);
     var school = this.getById(id);
     var diffCountStudents = school.studentsCount - newStudentsCount;
+
     for (var key in lectureCollection.collection) {
       var lecture = lectureCollection.collection[key];
       if (lecture.schoolList.indexOf(school) >= 0) {
@@ -84,25 +77,25 @@ var schoolCollection = {
       }
     }
 
-    School.editStudentsCount(newStudentsCount);
-
-
+    School.setStudentsCount(newStudentsCount);
   },
 
-  add : function (id, name, studentsCount) {
-
+  add: function (id, name, studentsCount) {
     validateId(id, this.collection);
     this.validateName(name);
     this.validateStudentsCount(studentsCount);
     this.collection[id] = new School(id, name, studentsCount);
 
+    return true;
   },
 
   getHtml : function (schoolList) {
     var html = '';
+
     for (var i = 0; i < schoolList.length; i++) {
       html += schoolList[i].getHtml();
     }
+
     return html;
   }
 };
