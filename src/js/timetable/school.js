@@ -66,18 +66,19 @@ var schoolCollection = {
 
   setStudentsCount: function (id, newStudentsCount) {
     this.validateStudentsCount(newStudentsCount);
-    this.getById(id).setStudentsCount(newStudentsCount);
     var school = this.getById(id);
-    var diffCountStudents = school.studentsCount - newStudentsCount;
+    var diffCountStudents = newStudentsCount - school.studentsCount;
 
     for (var key in lectureCollection.collection) {
       var lecture = lectureCollection.collection[key];
+
       if (lecture.schoolList.indexOf(school) >= 0) {
-        lectureCollection.validateCapacity(lecture.schoolList, lecture.classRoom.capacity + diffCountStudents);
+        lectureCollection.validateCapacity(lecture.schoolList, lecture.classRoom.capacity - diffCountStudents);
       }
     }
 
-    School.setStudentsCount(newStudentsCount);
+    school.setStudentsCount(newStudentsCount);
+    return true;
   },
 
   add: function (id, name, studentsCount) {

@@ -4,7 +4,7 @@ var assert = require('chai').assert;
 // Блокируем обращение к HTML
 Lecture.prototype.render = function () {};
 
-describe('TutorCollection', function () {
+describe('tutorCollection', function () {
   describe('#Add() Добавление преподавателя', function () {
     it('с корректыми данными (первый)', function () {
       assert.equal(true, tutorCollection.add('ATen', 'Антон Тен', 'В Яндексе с 2014 года.', 'img/AntonTen'));
@@ -27,7 +27,7 @@ describe('TutorCollection', function () {
   })
 });
 
-describe('ClassRoomCollection', function () {
+describe('classRoomCollection', function () {
   describe('#Add() Добавление школы', function () {
     it('с корректыми данными (первая)', function () {
       assert.equal(true, classRoomCollection.add('BlueWhale', 'Синий кит', 300, 'Москва, ул. Льва Толстого, 300'));
@@ -53,13 +53,16 @@ describe('ClassRoomCollection', function () {
   })
 });
 
-describe('SchoolCollection', function () {
+describe('schoolCollection', function () {
   describe('#Add() Добавление школы', function () {
     it('с корректыми данными (первая)', function () {
       assert.equal(true, schoolCollection.add('shri', 'Школа разработки интерфейсов', 120));
     });
     it('с корректыми данными (вторая)', function () {
       assert.equal(true, schoolCollection.add('shd', 'Школа мобильного дизайна', 100));
+    });
+    it('с корректыми данными (третья)', function () {
+      assert.equal(true, schoolCollection.add('shmd', 'Школа мобильной разработки', 70));
     });
     it('с невалидным id', function () {
       assert.throws(function () {schoolCollection.add('', 'Школа мобильного дизайна', 100)}, TimetableError);
@@ -79,13 +82,16 @@ describe('SchoolCollection', function () {
   })
 });
 
-describe('LectureCollection', function () {
+describe('lectureCollection', function () {
   describe('#Add() Добавление лекции', function () {
     it('с корректыми данными (первая)', function () {
       assert.equal(true, lectureCollection.add('Исследование, концепт', 'DDushkin', ['shri', 'shd'], 'BlueWhale', '2017-04-10T10:00:00Z', '2017-04-10T13:00:00Z'));
     });
     it('с корректыми данными (вторая)', function () {
       assert.equal(true, lectureCollection.add('Исследование, концепт', 'ATen', ['shd'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z'));
+    });
+    it('с корректыми данными (третья)', function () {
+      assert.equal(true, lectureCollection.add('Исследование, концепт', 'ATen', ['shmd'], 'Panda', '2017-04-10T10:00:00Z', '2017-04-10T13:00:00Z'));
     });
     it('с невалидным именем', function () {
       assert.throws(function () {lectureCollection.add(123, 'DDushkin', ['shri', 'shd'], 'Panda', '2017-05-10T13:10:00Z', '2017-05-10T15:00:00Z')}, TimetableError);
@@ -111,14 +117,74 @@ describe('LectureCollection', function () {
     it('с неверным форматом даты начала лекции', function () {
       assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', ['shri', 'shd'], 'BlueWhale', '2017-04-10T13:10:00', '2017-04-10T15:00:00Z')}, TimetableError);
     });
-    // it('в занятую аудиторию', function () {
-    //   assert.throws(function () {lectureCollection.add('Исследование, концепт', 'ATen', ['shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
-    // });
-    // it('с занятым преподавателем', function () {
-    //   assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', ['shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
-    // });
-    // it('с занятой школой', function () {
-    //   assert.throws(function () {lectureCollection.add('Исследование, концепт', 'ATen', ['shd'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
-    // });
+    it('в занятую аудиторию', function () {
+      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'ATen', ['shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+    });
+    it('с занятым преподавателем', function () {
+      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', ['shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+    });
+    it('с занятой школой', function () {
+      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'ATen', ['shd'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+    });
   })
+});
+
+//Set
+describe('classRoomCollection', function () {
+  describe('#Set() Изменение вместимости школы, в которой уже назначена лекция', function () {
+    it('на большое значение', function () {
+      assert.equal(true, classRoomCollection.setCapacity('BlueWhale', 300));
+    });
+    it('на маленькое значение', function () {
+      assert.throws(function () {classRoomCollection.setCapacity('BlueWhale', 50)}, TimetableError)
+    });
+  })
+});
+
+describe('schoolCollection', function () {
+  describe('#Set() Изменение кол-ва учеников школы', function () {
+    it('на маленькое значение', function () {
+      assert.equal(true, schoolCollection.setStudentsCount('shri', 20));
+    });
+    it('на значение, которое не поместится в аудитории', function () {
+      assert.throws(function () {schoolCollection.setStudentsCount('shri', 320)}, TimetableError)
+    });
+  })
+});
+
+describe('lectureCollection', function () {
+  describe('#Set() Изменение в лекции', function () {
+    it('преподавателя', function () {
+      assert.equal(true, lectureCollection.setTutor('1', 'DDushkin'));
+    });
+    it('преподавателя на занятого', function () {
+      assert.throws(function () {lectureCollection.setTutor('0', 'ATen')}, TimetableError)
+    });
+    it('школ', function () {
+      assert.equal(true, lectureCollection.setSchoolList('0', ['shd', 'shri']));
+    });
+    it('школ на занятую', function () {
+      assert.throws(function () {lectureCollection.setSchoolList('0', ['shd', 'shri', 'shmd'])}, TimetableError)
+    });
+    it('аудитории', function () {
+      assert.equal(true, lectureCollection.setClassRoom('1', 'BlueWhale'));
+    });
+    it('аудитории на занятую', function () {
+      assert.throws(function () {lectureCollection.setClassRoom('0', 'Panda')}, TimetableError)
+    });
+  });
+  describe('#Set() Перенос лекции', function () {
+    it('на свободное время', function () {
+      assert.equal(true, lectureCollection.setDates('0', '2017-05-10T13:10:00Z', '2017-05-10T15:10:00Z'));
+    });
+    it('на время, когда школа занята', function () {
+      assert.throws(function () {lectureCollection.setDates('0', '2017-04-10T12:00:00Z', '2017-04-10T15:00:00Z')}, TimetableError)
+    });
+    it('на время, когда аудитория занята', function () {
+      assert.throws(function () {lectureCollection.setDates('1', '2017-04-10T10:00:00Z', '2017-04-10T13:00:00Z')}, TimetableError)
+    });
+    it('на время, когда преподаватель занят', function () {
+      assert.throws(function () {lectureCollection.setDates('2', '2017-04-10T14:10:00Z', '2017-04-10T17:00:00Z')}, TimetableError)
+    });
+  });
 });

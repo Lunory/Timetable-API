@@ -96,6 +96,7 @@ var classRoomCollection = {
     }
 
     classRoom.setCapacity(newCapacity);
+    return true;
   },
 
   setLocation: function (id, newLocation) {

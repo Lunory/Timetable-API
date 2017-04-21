@@ -142,6 +142,7 @@ var lectureCollection = {
 
     for (var i = 0; i < schoolList.length; i++) {
       studentsCount += schoolList[i].studentsCount;
+
     }
 
     if (studentsCount > capacity) {
@@ -230,7 +231,7 @@ var lectureCollection = {
   setClassRoom : function (id, classRoomId) {
     var lecture = this.getById(id);
 
-    if (lecture.tutor.id === classRoomId){
+    if (lecture.classRoom.id === classRoomId){
       return true;
     }
 
@@ -262,6 +263,7 @@ var lectureCollection = {
     }
 
     lecture.setDates(dateBegin, dateEnd);
+    return true;
   },
 
   add : function (name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr) {
@@ -305,7 +307,6 @@ var lectureCollection = {
       } else {
         lecture.hide();
       }
-      
     }
   },
 
@@ -324,7 +325,6 @@ var lectureCollection = {
       } else {
         lecture.hide();
       }
-
     }
   }
 
