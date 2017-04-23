@@ -1,11 +1,18 @@
 function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   {
   this.id = id;
+  this.active = true;
   this.name = name;
   this.tutor = tutor;
   this.schoolList = schoolList;
   this.classRoom = classRoom;
   this.dateBegin = dateBegin;
   this.dateEnd = dateEnd;
+  this.day = null;
+
+  this.setActive = function (active) {
+    this.active = active
+    return true
+  }
 
   this.setTutor = function (newTutor) {
     this.tutor = newTutor;
@@ -23,6 +30,35 @@ function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   
     this.dateBegin = newDateBegin;
     this.dateEnd = newDateEnd;
   };
+  
+  this.setAllParams = function (params, newTutor, newSchoolList, newClassList, newDateBegin, newDateEnd) {
+    var tutor      = params.tutor      || this.tutor;
+    var schoolList = params.schoolList || this.schoolList;
+    var classRoom  = params.classRoom  || this.classRoom;
+    var dateBegin  = params.dateBegin  || this.dateBegin;
+    var dateEnd    = params.dateEnd    || this.dateEnd;
+    this.setActive(false)
+  }
+
+  this.setDay = function (day) {
+    this.day = day
+  }
+
+  this.getHtml = function () {
+    return '<div class="timetable__inner">' +
+              '<div class="timetable__column">' +
+                schoolCollection.getHtml(this.schoolList) +
+              '</div>' +
+              '<div class="timetable__subject">' +
+                '<p class="timetable__subject-theme">' +
+                  this.name +
+                '</p>' +
+                this.tutor.getHtml() +
+              '</div>' +
+              this.classRoom.getHtml() +
+              '<a class="timetable__status">с ' + getTime(this.dateBegin) + ' до ' + getTime(this.dateEnd) + '</a>' +
+            '</div>';
+  };
 
   //TODO for filters
   this.show = function () {
@@ -34,40 +70,9 @@ function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   
   };
 }
 
-Lecture.prototype.render = function () {
-  var board = document.querySelector('.timetable');
-  var wrap = document.createElement('div');
-  wrap.classList.add('timetable__item');
-
-  var innerHtml =
-    '<div class="timetable__head">' +
-      '<p class="timetable__day">' + getWeekDay(this.dateBegin) + ':</p>' +
-      '<p class="timetable__date">' + getMonth(this.dateBegin) + ', ' + this.dateBegin.getDate().toString() + '</p>' +
-    '</div>' +
-    '<div class="timetable__body">' +
-      '<div class="timetable__inner">' +
-        '<div class="timetable__column">' +
-          schoolCollection.getHtml(this.schoolList) +
-        '</div>' +
-        '<div class="timetable__subject">' +
-          '<p class="timetable__subject-theme">' +
-            this.name +
-          '</p>' +
-          this.tutor.getHtml() +
-        '</div>' +
-        this.classRoom.getHtml() +
-        '<a class="timetable__status">с ' + getTime(this.dateBegin) + ' до ' + getTime(this.dateEnd) + '</a>' +
-      '</div>' +
-    '</div>';
-
-  wrap.innerHTML = innerHtml;
-  board.appendChild(wrap);
-};
-
 var lectureCollection = {
-  nextId : 0,
-  collection : Object.create(null),
-  dayList: [],
+  nextId: 0,
+  collection: Object.create(null),
 
   getById : function (id) {
 
@@ -91,6 +96,9 @@ var lectureCollection = {
   },
 
   validateFreeTutor : function (lecture, tutorId, dateBegin, dateEnd, ignoreLectureId) {
+    if (lecture.active === false) {
+      return
+    }
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.tutor.id === tutorId && lecture.id !== ignoreLectureId){
@@ -104,6 +112,9 @@ var lectureCollection = {
   },
 
   validateFreeClassRoom : function (lecture, classRoomId, dateBegin, dateEnd, ignoreLectureId) {
+    if (lecture.active === false) {
+      return
+    }
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.classRoom.id === classRoomId && lecture.id !== ignoreLectureId) {
@@ -117,6 +128,9 @@ var lectureCollection = {
   },
 
   validateFreeSchool : function (lecture, schoolList, dateBegin, dateEnd, ignoreLectureId) {
+    if (lecture.active === false) {
+      return
+    }
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.id === ignoreLectureId) {
@@ -137,7 +151,10 @@ var lectureCollection = {
 
   },
 
-  validateCapacity : function (schoolList, capacity) {
+  validateCapacity : function (schoolList, capacity, lecture) {
+    if (lecture && lecture.active === false) {
+      return
+    }
     var studentsCount = 0;
 
     for (var i = 0; i < schoolList.length; i++) {
@@ -194,7 +211,10 @@ var lectureCollection = {
 
   setName : function (id, newName) {
     this.validateName(newName);
-    this.getById(id).name = newName;
+    var lecture = this.getById(id);
+    lecture.name = newName;
+
+    return lecture;
   },
 
   setTutor : function (id, tutorId) {
@@ -211,21 +231,22 @@ var lectureCollection = {
     }
 
     lecture.setTutor(tutor);
-    return true;
+
+    return lecture;
   },
 
   setSchoolList : function (id, schoolListId) {
     var lecture = this.getById(id);
     this.validateSchoolListId(schoolListId);
     var schoolList = this.getSchoolList(schoolListId);
-    this.validateCapacity(schoolList, lecture.classRoom.capacity);
+    this.validateCapacity(schoolList, lecture.classRoom.capacity, lecture);
 
     for (var key in this.collection) {
       this.validateFreeSchool(this.collection[key], schoolList, lecture.dateBegin, lecture.dateEnd, lecture.id);
     }
 
     lecture.setSchoolList(schoolList);
-    return true;
+    return lecture;
   },
 
   setClassRoom : function (id, classRoomId) {
@@ -236,7 +257,7 @@ var lectureCollection = {
     }
 
     var classRoom = classRoomCollection.getById(classRoomId);
-    this.validateCapacity(lecture.schoolList, classRoom.capacity);
+    this.validateCapacity(lecture.schoolList, classRoom.capacity, lecture);
 
     for (var key in this.collection) {
       this.validateFreeClassRoom(this.collection[key], classRoomId, lecture.dateBegin, lecture.dateEnd, lecture.id);
@@ -246,13 +267,10 @@ var lectureCollection = {
     return true;
   },
 
-  setDates : function (id, dateBeginStr, dateEndStr) {
+  setDates : function (id, dateBegin, dateEnd) {
     var lecture = this.getById(id);
-    var dateBegin = createDate(dateBeginStr);
-    var dateEnd = createDate(dateEndStr);
-    validateDates(dateBegin, dateEnd);
 
-    if (lecture.dateBegin === dateBegin || lecture.dateEnd === dateEnd) {
+    if (lecture.dateBegin.getTime() === dateBegin.getTime() || lecture.dateEnd.getTime() === dateEnd.getTime()) {
       return true;
     }
 
@@ -263,10 +281,11 @@ var lectureCollection = {
     }
 
     lecture.setDates(dateBegin, dateEnd);
-    return true;
+
+    return lecture;
   },
 
-  add : function (name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr) {
+  create : function (name, tutorId, schoolListId, classRoomId, dateBegin, dateEnd) {
     this.validateName(name);
     var tutor = tutorCollection.getById(tutorId);
     var classRoom = classRoomCollection.getById(classRoomId);
@@ -275,57 +294,22 @@ var lectureCollection = {
     var schoolList = this.getSchoolList(schoolListId);
     this.validateCapacity(schoolList, classRoom.capacity);
 
-    var dateBegin = createDate(dateBeginStr);
-    var dateEnd = createDate(dateEndStr);
-    validateDates(dateBegin, dateEnd);
-
     for (var key in this.collection) {
       this.validateFreeTutor(this.collection[key], tutorId, dateBegin, dateEnd);
       this.validateFreeClassRoom(this.collection[key], classRoomId, dateBegin, dateEnd);
       this.validateFreeSchool(this.collection[key], schoolList, dateBegin, dateEnd);
     }
 
-    this.collection[this.nextId.toString()] = new Lecture (this.nextId.toString(), name, tutor, schoolList, classRoom, dateBegin, dateEnd);
-    this.collection[this.nextId.toString()].render();
+    var lecture = new Lecture (this.nextId.toString(), name, tutor, schoolList, classRoom, dateBegin, dateEnd);
+    this.collection[lecture.id] = lecture;
     this.nextId++;
 
-    return true;
+    return lecture;
   },
 
-  filterBySchoolAndDates : function (schoolId, dateBeginStr, dateEndStr) {
-    var school = schoolCollection.getById(schoolId);
-
-    var dateBegin = createDate(dateBeginStr);
-    var dateEnd = createDate(dateEndStr);
-    validateDates(dateBegin, dateEnd);
-
-    for (var key in lectureCollection.collection) {
-      var lecture = lectureCollection.collection[key];
-
-      if ((lecture.dateBegin > dateBegin) && (lecture.dateEnd < dateEnd) && (lecture.schoolList.indexOf(school) >= 0)) {
-        lecture.show();
-      } else {
-        lecture.hide();
-      }
-    }
+  remove : function (id) {
+    this.getById(id)
+    delete this.collection[id]
   },
-
-  filterByClassRoomAndDates : function (classRoomId, dateBeginStr, dateEndStr) {
-    var classRoom = classRoomCollection.getById(classRoomId);
-
-    var dateBegin = createDate(dateBeginStr);
-    var dateEnd = createDate(dateEndStr);
-    validateDates(dateBegin, dateEnd);
-
-    for (var key in lectureCollection.collection) {
-      var lecture = lectureCollection.collection[key];
-
-      if ((lecture.dateBegin > dateBegin) && (lecture.dateEnd < dateEnd) && (lecture.classRoom === classRoom)) {
-        lecture.show();
-      } else {
-        lecture.hide();
-      }
-    }
-  }
 
 };

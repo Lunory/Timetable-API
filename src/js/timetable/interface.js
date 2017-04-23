@@ -13,7 +13,7 @@ var timetable = {
     }
 
     for (var i = 0; i < data.lectureList.length; i++) {
-      lectureCollection.add(data.lectureList[i].name, data.lectureList[i].tutorId, data.lectureList[i].schoolListId, data.lectureList[i].classRoomId, data.lectureList[i].dateBeginStr, data.lectureList[i].dateEndStr);
+      dayCollection.addLecture(data.lectureList[i].name, data.lectureList[i].tutorId, data.lectureList[i].schoolListId, data.lectureList[i].classRoomId, data.lectureList[i].dateBeginStr, data.lectureList[i].dateEndStr);
     }
   }
 };

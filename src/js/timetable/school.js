@@ -73,7 +73,7 @@ var schoolCollection = {
       var lecture = lectureCollection.collection[key];
 
       if (lecture.schoolList.indexOf(school) >= 0) {
-        lectureCollection.validateCapacity(lecture.schoolList, lecture.classRoom.capacity - diffCountStudents);
+        lectureCollection.validateCapacity(lecture.schoolList, lecture.classRoom.capacity - diffCountStudents, lecture);
       }
     }
 

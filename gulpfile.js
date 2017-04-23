@@ -51,7 +51,7 @@ gulp.task('style', function() {
 //Concat JS
 gulp.task('scripts', function() {
   return gulp.src(['src/js/timetable/error.js', 'src/js/timetable/utility.js', 'src/js/timetable/tutor.js', 'src/js/timetable/school.js',
-    'src/js/timetable/classRoom.js', 'src/js/timetable/lecture.js', 'src/js/timetable/interface.js'])
+    'src/js/timetable/classRoom.js', 'src/js/timetable/lecture.js','src/js/timetable/day.js'])
     .pipe(concat('timetableAPI.js'))
     .pipe(gulp.dest('build/js'));
 });
@@ -59,7 +59,7 @@ gulp.task('scripts', function() {
 //Concat JS for test
 gulp.task('testScripts', function() {
   return gulp.src(['src/js/timetable/error.js', 'src/js/timetable/utility.js', 'src/js/timetable/tutor.js', 'src/js/timetable/school.js',
-    'src/js/timetable/classRoom.js', 'src/js/timetable/lecture.js', 'src/js/timetable/interface.js', 'src/test/test.js'])
+    'src/js/timetable/classRoom.js', 'src/js/timetable/lecture.js', 'src/js/timetable/day.js', 'src/test/test.js'])
     .pipe(concat('test.js'))
     .pipe(gulp.dest('test/'));
 });

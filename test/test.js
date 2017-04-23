@@ -77,6 +77,15 @@ function getMonth (date) {
   return monthName[date.getMonth()];
 }
 
+function getStartDay(date) {
+  var startDate = new Date(date.getTime());
+  startDate.setHours(0);
+  startDate.setMinutes(0);
+  startDate.setSeconds(0);
+  startDate.setMilliseconds(0);
+
+  return startDate;
+}
 function Tutor (id, name, about, img) {
   this.id = id;
   this.name = name;
@@ -216,7 +225,7 @@ var schoolCollection = {
       var lecture = lectureCollection.collection[key];
 
       if (lecture.schoolList.indexOf(school) >= 0) {
-        lectureCollection.validateCapacity(lecture.schoolList, lecture.classRoom.capacity - diffCountStudents);
+        lectureCollection.validateCapacity(lecture.schoolList, lecture.classRoom.capacity - diffCountStudents, lecture);
       }
     }
 
@@ -335,7 +344,8 @@ var classRoomCollection = {
     for (var key in lectureCollection.collection) {
 
       if (lectureCollection.collection[key].classRoom === classRoom) {
-        lectureCollection.validateCapacity(lectureCollection.collection[key].schoolList, newCapacity);
+        var lecture = lectureCollection.collection[key]
+        lectureCollection.validateCapacity(lecture.schoolList, newCapacity, lecture);
       }
 
     }
@@ -363,12 +373,19 @@ var classRoomCollection = {
 };
 function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   {
   this.id = id;
+  this.active = true;
   this.name = name;
   this.tutor = tutor;
   this.schoolList = schoolList;
   this.classRoom = classRoom;
   this.dateBegin = dateBegin;
   this.dateEnd = dateEnd;
+  this.day = null;
+
+  this.setActive = function (active) {
+    this.active = active
+    return true
+  }
 
   this.setTutor = function (newTutor) {
     this.tutor = newTutor;
@@ -386,6 +403,35 @@ function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   
     this.dateBegin = newDateBegin;
     this.dateEnd = newDateEnd;
   };
+  
+  this.setAllParams = function (params, newTutor, newSchoolList, newClassList, newDateBegin, newDateEnd) {
+    var tutor      = params.tutor      || this.tutor;
+    var schoolList = params.schoolList || this.schoolList;
+    var classRoom  = params.classRoom  || this.classRoom;
+    var dateBegin  = params.dateBegin  || this.dateBegin;
+    var dateEnd    = params.dateEnd    || this.dateEnd;
+    this.setActive(false)
+  }
+
+  this.setDay = function (day) {
+    this.day = day
+  }
+
+  this.getHtml = function () {
+    return '<div class="timetable__inner">' +
+              '<div class="timetable__column">' +
+                schoolCollection.getHtml(this.schoolList) +
+              '</div>' +
+              '<div class="timetable__subject">' +
+                '<p class="timetable__subject-theme">' +
+                  this.name +
+                '</p>' +
+                this.tutor.getHtml() +
+              '</div>' +
+              this.classRoom.getHtml() +
+              '<a class="timetable__status">с ' + getTime(this.dateBegin) + ' до ' + getTime(this.dateEnd) + '</a>' +
+            '</div>';
+  };
 
   //TODO for filters
   this.show = function () {
@@ -397,40 +443,9 @@ function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   
   };
 }
 
-Lecture.prototype.render = function () {
-  var board = document.querySelector('.timetable');
-  var wrap = document.createElement('div');
-  wrap.classList.add('timetable__item');
-
-  var innerHtml =
-    '<div class="timetable__head">' +
-      '<p class="timetable__day">' + getWeekDay(this.dateBegin) + ':</p>' +
-      '<p class="timetable__date">' + getMonth(this.dateBegin) + ', ' + this.dateBegin.getDate().toString() + '</p>' +
-    '</div>' +
-    '<div class="timetable__body">' +
-      '<div class="timetable__inner">' +
-        '<div class="timetable__column">' +
-          schoolCollection.getHtml(this.schoolList) +
-        '</div>' +
-        '<div class="timetable__subject">' +
-          '<p class="timetable__subject-theme">' +
-            this.name +
-          '</p>' +
-          this.tutor.getHtml() +
-        '</div>' +
-        this.classRoom.getHtml() +
-        '<a class="timetable__status">с ' + getTime(this.dateBegin) + ' до ' + getTime(this.dateEnd) + '</a>' +
-      '</div>' +
-    '</div>';
-
-  wrap.innerHTML = innerHtml;
-  board.appendChild(wrap);
-};
-
 var lectureCollection = {
-  nextId : 0,
-  collection : Object.create(null),
-  dayList: [],
+  nextId: 0,
+  collection: Object.create(null),
 
   getById : function (id) {
 
@@ -454,6 +469,9 @@ var lectureCollection = {
   },
 
   validateFreeTutor : function (lecture, tutorId, dateBegin, dateEnd, ignoreLectureId) {
+    if (lecture.active === false) {
+      return
+    }
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.tutor.id === tutorId && lecture.id !== ignoreLectureId){
@@ -467,6 +485,9 @@ var lectureCollection = {
   },
 
   validateFreeClassRoom : function (lecture, classRoomId, dateBegin, dateEnd, ignoreLectureId) {
+    if (lecture.active === false) {
+      return
+    }
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.classRoom.id === classRoomId && lecture.id !== ignoreLectureId) {
@@ -480,6 +501,9 @@ var lectureCollection = {
   },
 
   validateFreeSchool : function (lecture, schoolList, dateBegin, dateEnd, ignoreLectureId) {
+    if (lecture.active === false) {
+      return
+    }
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.id === ignoreLectureId) {
@@ -500,7 +524,10 @@ var lectureCollection = {
 
   },
 
-  validateCapacity : function (schoolList, capacity) {
+  validateCapacity : function (schoolList, capacity, lecture) {
+    if (lecture && lecture.active === false) {
+      return
+    }
     var studentsCount = 0;
 
     for (var i = 0; i < schoolList.length; i++) {
@@ -557,7 +584,10 @@ var lectureCollection = {
 
   setName : function (id, newName) {
     this.validateName(newName);
-    this.getById(id).name = newName;
+    var lecture = this.getById(id);
+    lecture.name = newName;
+
+    return lecture;
   },
 
   setTutor : function (id, tutorId) {
@@ -574,21 +604,22 @@ var lectureCollection = {
     }
 
     lecture.setTutor(tutor);
-    return true;
+
+    return lecture;
   },
 
   setSchoolList : function (id, schoolListId) {
     var lecture = this.getById(id);
     this.validateSchoolListId(schoolListId);
     var schoolList = this.getSchoolList(schoolListId);
-    this.validateCapacity(schoolList, lecture.classRoom.capacity);
+    this.validateCapacity(schoolList, lecture.classRoom.capacity, lecture);
 
     for (var key in this.collection) {
       this.validateFreeSchool(this.collection[key], schoolList, lecture.dateBegin, lecture.dateEnd, lecture.id);
     }
 
     lecture.setSchoolList(schoolList);
-    return true;
+    return lecture;
   },
 
   setClassRoom : function (id, classRoomId) {
@@ -599,7 +630,7 @@ var lectureCollection = {
     }
 
     var classRoom = classRoomCollection.getById(classRoomId);
-    this.validateCapacity(lecture.schoolList, classRoom.capacity);
+    this.validateCapacity(lecture.schoolList, classRoom.capacity, lecture);
 
     for (var key in this.collection) {
       this.validateFreeClassRoom(this.collection[key], classRoomId, lecture.dateBegin, lecture.dateEnd, lecture.id);
@@ -609,13 +640,10 @@ var lectureCollection = {
     return true;
   },
 
-  setDates : function (id, dateBeginStr, dateEndStr) {
+  setDates : function (id, dateBegin, dateEnd) {
     var lecture = this.getById(id);
-    var dateBegin = createDate(dateBeginStr);
-    var dateEnd = createDate(dateEndStr);
-    validateDates(dateBegin, dateEnd);
 
-    if (lecture.dateBegin === dateBegin || lecture.dateEnd === dateEnd) {
+    if (lecture.dateBegin.getTime() === dateBegin.getTime() || lecture.dateEnd.getTime() === dateEnd.getTime()) {
       return true;
     }
 
@@ -626,10 +654,11 @@ var lectureCollection = {
     }
 
     lecture.setDates(dateBegin, dateEnd);
-    return true;
+
+    return lecture;
   },
 
-  add : function (name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr) {
+  create : function (name, tutorId, schoolListId, classRoomId, dateBegin, dateEnd) {
     this.validateName(name);
     var tutor = tutorCollection.getById(tutorId);
     var classRoom = classRoomCollection.getById(classRoomId);
@@ -638,21 +667,220 @@ var lectureCollection = {
     var schoolList = this.getSchoolList(schoolListId);
     this.validateCapacity(schoolList, classRoom.capacity);
 
-    var dateBegin = createDate(dateBeginStr);
-    var dateEnd = createDate(dateEndStr);
-    validateDates(dateBegin, dateEnd);
-
     for (var key in this.collection) {
       this.validateFreeTutor(this.collection[key], tutorId, dateBegin, dateEnd);
       this.validateFreeClassRoom(this.collection[key], classRoomId, dateBegin, dateEnd);
       this.validateFreeSchool(this.collection[key], schoolList, dateBegin, dateEnd);
     }
 
-    this.collection[this.nextId.toString()] = new Lecture (this.nextId.toString(), name, tutor, schoolList, classRoom, dateBegin, dateEnd);
-    this.collection[this.nextId.toString()].render();
+    var lecture = new Lecture (this.nextId.toString(), name, tutor, schoolList, classRoom, dateBegin, dateEnd);
+    this.collection[lecture.id] = lecture;
     this.nextId++;
 
+    return lecture;
+  },
+
+  remove : function (id) {
+    this.getById(id)
+    delete this.collection[id]
+  },
+
+};
+function Day (startDay) {
+  this.date = startDay;
+  this.lectureList = [];
+  this.htmlElement = null;
+
+  this.addLecture = function (lecture) {
+    if (this.lectureList.length === 0){
+      this.lectureList.push(lecture)
+    } else {
+      for (var i = 0; i < this.lectureList.length; i++){
+        if (this.lectureList[i].dateBegin > lecture.dateBegin){
+          this.lectureList.splice(i, 0, lecture)
+          break
+        }
+        if (i + 1 === this.lectureList.length){
+          this.lectureList.push(lecture)
+          break
+        }
+      }
+    }
+    lecture.setDay(this)
+    return true
+  };
+
+  this.removeLecture = function (lecture) {
+    var index = this.lectureList.indexOf(lecture);
+    if (index > -1) {
+      this.lectureList.splice(index, 1);
+      lecture.day = null
+    }
+  };
+
+  this.getHtml = function () {
+    var wrap = document.createElement('div');
+    wrap.classList.add('timetable__item');
+    var innerHtml =
+      '<div class="timetable__head">' +
+        '<p class="timetable__day">' + getWeekDay(this.date) + ':</p>' +
+        '<p class="timetable__date">' + getMonth(this.date) + ', ' + this.date.getDate().toString() + '</p>' +
+      '</div>' +
+      '<div class="timetable__body">';
+
+      for (var i = 0; i < this.lectureList.length; i++) {
+        innerHtml += this.lectureList[i].getHtml();
+      }
+      innerHtml += '</div>';
+
+      wrap.innerHTML = innerHtml;
+      return wrap;
+  };
+}
+
+var dayCollection = {
+  dayList: [],
+
+  getDay: function (lectureDateBegin) {
+    var startDay = getStartDay(lectureDateBegin);
+    var day;
+
+    if (this.dayList.length === 0){
+      day = new Day(startDay);
+      this.dayList.push(day);
+    } else {
+      for (var i = 0; i < this.dayList.length; i++) {
+
+        if (this.dayList[i].date.getTime() === startDay.getTime()) {
+          day = this.dayList[i];
+          break;
+        }
+
+        if (this.dayList[i].date.getTime() > startDay.getTime()) {
+          day = new Day(startDay);
+          this.dayList.splice(i, 0, day);
+          break;
+        }
+
+        if (i + 1 == this.dayList.length) {
+          day = new Day(startDay);
+          this.dayList.push(day);
+          break;
+        }
+      }
+    }
+    return day
+  },
+
+  render: function (day) {
+    var elementBefore = null;
+    var board = document.querySelector('.timetable');
+
+    if (day.htmlElement !== null) {
+      board.removeChild(day.htmlElement);
+    }
+
+    day.htmlElement = null;
+
+    for (var i = this.dayList.indexOf(day); i < this.dayList.length; i++ ) {
+      if (this.dayList[i].active === true && this.dayList[i].htmlElement !== null) {
+        elementBefore = this.dayList[i].htmlElement;
+        break;
+      }
+    }
+
+    day.htmlElement = day.getHtml();
+    board.insertBefore(day.htmlElement, elementBefore);
+  },
+
+  // User method
+
+  addLecture: function (name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr) {
+
+    var dateBegin = createDate(dateBeginStr);
+    var dateEnd = createDate(dateEndStr);
+    validateDates(dateBegin, dateEnd);
+
+    var lecture = lectureCollection.create(name, tutorId, schoolListId, classRoomId, dateBegin, dateEnd);
+
+    var startDay = getStartDay(dateBegin);
+    var day = this.getDay(startDay);
+
+    day.addLecture(lecture);
+    //this.render(day);
+
+    return lecture.id
+  },
+
+  removeLecture: function (id) {
+    var lecture = lectureCollection.getById(id);
+    if (lecture.day !== null){
+      var day = lecture.day;
+      day.removeLecture(lecture);
+      this.render(day);
+    }
+    lectureCollection.remove(lecture.id);
+    return true
+  },
+
+  setLectureName: function (id, newName) {
+    var lecture = lectureCollection.setName(id, newName);
+    this.render(lecture.day);
+
     return true;
+  },
+
+  setLectureTutor: function (id, tutorId) {
+    var lecture = lectureCollection.setTutor(id, tutorId);
+    this.render(lecture.day);
+
+    return true;
+  },
+
+  setLectureSchoolList: function (id, schoolListId) {
+    var lecture = lectureCollection.setSchoolList(id, schoolListId)
+    this.render(lecture.day)
+  },
+
+  setLectureClassRoom: function (id, classRoomId){
+    var lecture = lectureCollection.setClassRoom(id, classRoomId)
+    this.render(lecture.day)
+  },
+
+  setLectureDate: function (id, dateBeginStr, dateEndStr) {
+    var dateBegin = createDate(dateBeginStr);
+    var dateEnd = createDate(dateEndStr);
+    validateDates(dateBegin, dateEnd);
+
+    var lecture = lectureCollection.getById(id);
+    var oldDay = lecture.day;
+
+    lectureCollection.setDates(id, dateBegin, dateEnd);
+    var newDay = this.getDay(lecture.dateBegin);
+    if (oldDay !== newDay){
+      oldDay.removeLecture(lecture);
+      newDay.addLecture(lecture)
+    }
+    this.render(oldDay);
+    this.render(newDay);
+
+    return true
+  },
+
+  setAllParams : function (id, name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr) {
+
+    var lecture = lectureCollection.getById(id);
+    lecture.setActive(false);
+    var newLectureId;
+
+    try {
+      newLectureId = this.addLecture(name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr)
+    } catch (e) {
+      lecture.setActive(true);
+      throw e
+    }
+    this.removeLecture(lecture.id);
+    return newLectureId
   },
 
   filterBySchoolAndDates : function (schoolId, dateBeginStr, dateEndStr) {
@@ -690,8 +918,8 @@ var lectureCollection = {
       }
     }
   }
-
 };
+
 var timetable = {
   init: function (data) {
     for (var i = 0; i < data.tutorList.length; i++) {
@@ -707,10 +935,11 @@ var timetable = {
     }
 
     for (var i = 0; i < data.lectureList.length; i++) {
-      lectureCollection.add(data.lectureList[i].name, data.lectureList[i].tutorId, data.lectureList[i].schoolListId, data.lectureList[i].classRoomId, data.lectureList[i].dateBeginStr, data.lectureList[i].dateEndStr);
+      dayCollection.addLecture(data.lectureList[i].name, data.lectureList[i].tutorId, data.lectureList[i].schoolListId, data.lectureList[i].classRoomId, data.lectureList[i].dateBeginStr, data.lectureList[i].dateEndStr);
     }
   }
 };
+
 var assert = require('chai').assert;
 
 
@@ -798,46 +1027,46 @@ describe('schoolCollection', function () {
 describe('lectureCollection', function () {
   describe('#Add() Добавление лекции', function () {
     it('с корректыми данными (первая)', function () {
-      assert.equal(true, lectureCollection.add('Исследование, концепт', 'DDushkin', ['shri', 'shd'], 'BlueWhale', '2017-04-10T10:00:00Z', '2017-04-10T13:00:00Z'));
+      assert.equal(true, dayCollection.addLecture('Исследование, концепт', 'DDushkin', ['shri', 'shd'], 'BlueWhale', '2017-04-10T10:00:00Z', '2017-04-10T13:00:00Z'));
     });
     it('с корректыми данными (вторая)', function () {
-      assert.equal(true, lectureCollection.add('Исследование, концепт', 'ATen', ['shd'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z'));
+      assert.equal(true, dayCollection.addLecture('Исследование, концепт', 'ATen', ['shd'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z'));
     });
     it('с корректыми данными (третья)', function () {
-      assert.equal(true, lectureCollection.add('Исследование, концепт', 'ATen', ['shmd'], 'Panda', '2017-04-10T10:00:00Z', '2017-04-10T13:00:00Z'));
+      assert.equal(true, dayCollection.addLecture('Исследование, концепт', 'ATen', ['shmd'], 'Panda', '2017-04-10T10:00:00Z', '2017-04-10T13:00:00Z'));
     });
     it('с невалидным именем', function () {
-      assert.throws(function () {lectureCollection.add(123, 'DDushkin', ['shri', 'shd'], 'Panda', '2017-05-10T13:10:00Z', '2017-05-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture(123, 'DDushkin', ['shri', 'shd'], 'Panda', '2017-05-10T13:10:00Z', '2017-05-10T15:00:00Z')}, TimetableError);
     });
     it('с невалидным id преподавателя', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', '', ['shri', 'shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', '', ['shri', 'shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
     });
     it('с невалидным id аудитории', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', ['shri', 'shd'], 123, '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', 'DDushkin', ['shri', 'shd'], 123, '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
     });
     it('с двумя одинаковыми школами', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', ['shri', 'shri'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', 'DDushkin', ['shri', 'shri'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
     });
     it('с массивом с пустой школой', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', ['', 'shri'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', 'DDushkin', ['', 'shri'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
     });
     it('с пустым массивом школ', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', [], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', 'DDushkin', [], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
     });
     it('с переполнением аудитории студентами', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', ['shri'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', 'DDushkin', ['shri'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
     });
     it('с неверным форматом даты начала лекции', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', ['shri', 'shd'], 'BlueWhale', '2017-04-10T13:10:00', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', 'DDushkin', ['shri', 'shd'], 'BlueWhale', '2017-04-10T13:10:00', '2017-04-10T15:00:00Z')}, TimetableError);
     });
     it('в занятую аудиторию', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'ATen', ['shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', 'ATen', ['shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
     });
     it('с занятым преподавателем', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'DDushkin', ['shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', 'DDushkin', ['shd'], 'BlueWhale', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
     });
     it('с занятой школой', function () {
-      assert.throws(function () {lectureCollection.add('Исследование, концепт', 'ATen', ['shd'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
+      assert.throws(function () {dayCollection.addLecture('Исследование, концепт', 'ATen', ['shd'], 'Panda', '2017-04-10T13:10:00Z', '2017-04-10T15:00:00Z')}, TimetableError);
     });
   })
 });

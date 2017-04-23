@@ -90,7 +90,8 @@ var classRoomCollection = {
     for (var key in lectureCollection.collection) {
 
       if (lectureCollection.collection[key].classRoom === classRoom) {
-        lectureCollection.validateCapacity(lectureCollection.collection[key].schoolList, newCapacity);
+        var lecture = lectureCollection.collection[key]
+        lectureCollection.validateCapacity(lecture.schoolList, newCapacity, lecture);
       }
 
     }

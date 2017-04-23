@@ -69,3 +69,13 @@ function getWeekDay (date) {
 function getMonth (date) {
   return monthName[date.getMonth()];
 }
+
+function getStartDay(date) {
+  var startDate = new Date(date.getTime());
+  startDate.setHours(0);
+  startDate.setMinutes(0);
+  startDate.setSeconds(0);
+  startDate.setMilliseconds(0);
+
+  return startDate;
+}
