@@ -4,6 +4,18 @@ function ClassRoom (id, name, capacity, location) {
   this.capacity = capacity;
   this.location = location;
 
+  this.getHtml = function () {
+    return '<p class="timetable__place">'+ this.name + '<br>' + this.location +'</p>';
+  };
+
+  this.toJSON = function () {
+    return {
+      'id': this.id,
+      'name': this.name,
+      'capacity': this.capacity,
+      'location': this.location}
+  };
+
   this.setName = function(newName) {
     this.name = newName;
   };
@@ -15,18 +27,12 @@ function ClassRoom (id, name, capacity, location) {
   this.setLocation = function (newLocation) {
     this.location = newLocation;
   };
-
-  this.getHtml = function () {
-    return '<p class="timetable__place">'+ this.location +'</p>';
-  }
 }
 
 var classRoomCollection = {
-
   collection: Object.create(null),
 
   validateName: function (newName) {
-
     if (typeof newName !== 'string') {
       throw new TimetableError('Имя должно быть строкой');
     }
@@ -36,17 +42,13 @@ var classRoomCollection = {
     }
 
     for (var key in this.collection) {
-
       if (this.collection[key].name === newName) {
         throw new TimetableError('Аудитория с таким именем уже существует');
       }
-
     }
-
   },
 
   validateCapacity: function (newCapacity) {
-
     if (!isNaturalNum(newCapacity)) {
       throw new TimetableError('Количество мест в аудитории должно быть числом');
     }
@@ -54,11 +56,9 @@ var classRoomCollection = {
     if (newCapacity <= 0) {
       throw new TimetableError('Количество мест в аудитории должно быть больше 0');
     }
-
   },
 
   validateLocation: function (newLocation) {
-
     if (typeof newLocation !== 'string') {
       throw new TimetableError('Месторасположение аудитории должно быть строкой');
     }
@@ -66,11 +66,9 @@ var classRoomCollection = {
     if (newLocation.length === 0) {
       throw new TimetableError('Месторасположение аудитории не должно быть пустым');
     }
-
   },
 
   getById: function (id) {
-
     if (!(this.collection[id] instanceof ClassRoom)) {
       throw new TimetableError('Аудитории с таким id не существует');
     }
@@ -88,15 +86,14 @@ var classRoomCollection = {
     var classRoom = this.getById(id);
 
     for (var key in lectureCollection.collection) {
-
       if (lectureCollection.collection[key].classRoom === classRoom) {
-        var lecture = lectureCollection.collection[key]
+        var lecture = lectureCollection.collection[key];
         lectureCollection.validateCapacity(lecture.schoolList, newCapacity, lecture);
       }
-
     }
 
     classRoom.setCapacity(newCapacity);
+
     return true;
   },
 
@@ -115,5 +112,4 @@ var classRoomCollection = {
 
     return true;
   }
-
 };

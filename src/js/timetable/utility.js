@@ -7,7 +7,6 @@ function isNaturalNum (num) {
 }
 
 function intersectionDates (dateBegin1, dateEnd1, dateBegin2, dateEnd2) {
-
   if (dateBegin1 > dateEnd2 || dateEnd1 < dateBegin2) {
     return false;
   }
@@ -16,7 +15,6 @@ function intersectionDates (dateBegin1, dateEnd1, dateBegin2, dateEnd2) {
 }
 
 function validateId (id, collection) {
-
   if (typeof id !== 'string') {
     throw new TimetableError('id должен быть строкой');
   }
@@ -28,11 +26,9 @@ function validateId (id, collection) {
   if (collection[id] !== undefined) {
     throw new TimetableError('Объект с таким id существует');
   }
-
 }
 
 function validateDates (dateBegin, dateEnd) {
-
   if (isNaN(dateBegin.getTime()) || isNaN(dateEnd.getTime())) {
     throw new TimetableError('Неверная дата');
   }
@@ -40,11 +36,9 @@ function validateDates (dateBegin, dateEnd) {
   if (dateBegin > dateEnd){
     throw new TimetableError('Дата начала больше даты конца');
   }
-
 }
 
 function createDate (date) {
-
   if (!dateRegExp.test(date)) {
     throw new TimetableError('Неверный формат даты');
   }

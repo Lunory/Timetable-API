@@ -13,15 +13,22 @@ function Tutor (id, name, about, img) {
       '">' +
       '<span>' + this.name + '</span>' +
       '</a>';
-  }
+  };
+
+  this.toJSON = function () {
+    return {
+      'id': this.id,
+      'name': this.name,
+      'about': this.about,
+      'img': this.img
+    }
+  };
 }
 
 var tutorCollection = {
-
   collection: Object.create(null),
 
   validateName: function (newName) {
-
     if (typeof newName !== 'string') {
       throw new TimetableError('Имя должно быть строкой');
     }
@@ -29,11 +36,9 @@ var tutorCollection = {
     if ( newName.length === 0) {
       throw new TimetableError('Имя не должно быть пустое');
     }
-
   },
 
   validateAbout: function (newAbout) {
-
     if (typeof newAbout !== 'string') {
       throw new TimetableError('Информация о преподавателе должна быть строкой');
     }
@@ -41,11 +46,9 @@ var tutorCollection = {
     if (newAbout.length === 0) {
       throw new TimetableError('Информация о преподавателе не должна быть пустой');
     }
-
   },
 
   getById: function (id) {
-
     if (!(this.collection[id] instanceof Tutor)) {
       throw new TimetableError('Преподавателя с таким id не существует');
     }

@@ -13,6 +13,14 @@
 		@media (--tablet-width) {
 			margin-bottom: 30px;
 		}
+
+		&--hide {
+			display: none;
+
+			@media (--tablet-width) {
+				display: none;
+			}
+		}
 	}
 
 	&__head {
@@ -64,6 +72,14 @@
 			align-items: center;
 			justify-content: space-between;
 			flex-wrap: wrap;
+		}
+
+		&--hide {
+			display: none;
+
+			@media (--tablet-width) {
+				display: none;
+			}
 		}
 
 		&--frontend::before {

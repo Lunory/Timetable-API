@@ -1,4 +1,4 @@
-function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   {
+function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd, materialHref) {
   this.id = id;
   this.active = true;
   this.name = name;
@@ -7,12 +7,64 @@ function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   
   this.classRoom = classRoom;
   this.dateBegin = dateBegin;
   this.dateEnd = dateEnd;
+  this.materialHref = materialHref;
   this.day = null;
 
+  this.hasClassRoomId = function (classRoomId) {
+    return this.classRoom.id === classRoomId;
+  };
+
+  this.hasSchoolId = function (schoolId) {
+    for (var i = 0; i < this.schoolList.length; i++){
+      if (this.schoolList[i].id === schoolId){
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  this.getHtml = function () {
+    return '<div class="timetable__inner" data-id="' + this.id + '">' +
+      '<div class="timetable__column">' +
+      schoolCollection.getHtml(this.schoolList) +
+      '</div>' +
+      '<div class="timetable__subject">' +
+      '<p class="timetable__subject-theme">' +
+      this.name +
+      '</p>' +
+      this.tutor.getHtml() +
+      '</div>' +
+      this.classRoom.getHtml() +
+      this.getMaterialHtml() +
+      '</div>';
+  };
+
+  this.getMaterialHtml = function () {
+    if (this.materialHref !== null) {
+      return '<a class="timetable__status  timetable__status--complete" href="' + this.materialHref +'">Материалы опубликованы </a>';
+    }
+
+    return '<a class="timetable__status">с ' + getTime(this.dateBegin) + ' до ' + getTime(this.dateEnd) + '</a>'
+  };
+
+  this.toJSON = function () {
+    return {
+      'id': this.id,
+      'name': this.name,
+      'tutor': this.tutor,
+      'schoolList': this.schoolList,
+      'classRoom': this.classRoom,
+      'dateBegin': this.dateBegin.toISOString(),
+      'dateEnd': this.dateEnd.toISOString()
+    }
+  };
+
   this.setActive = function (active) {
-    this.active = active
-    return true
-  }
+    this.active = active;
+
+    return true;
+  };
 
   this.setTutor = function (newTutor) {
     this.tutor = newTutor;
@@ -26,47 +78,34 @@ function Lecture (id, name, tutor, schoolList, classRoom, dateBegin, dateEnd)   
     this.classList = newClassList;
   };
 
-  this.setDates = function (newDateBegin, newDateEnd) {
+  this.setDate = function (newDateBegin, newDateEnd) {
     this.dateBegin = newDateBegin;
     this.dateEnd = newDateEnd;
   };
-  
-  this.setAllParams = function (params, newTutor, newSchoolList, newClassList, newDateBegin, newDateEnd) {
-    var tutor      = params.tutor      || this.tutor;
-    var schoolList = params.schoolList || this.schoolList;
-    var classRoom  = params.classRoom  || this.classRoom;
-    var dateBegin  = params.dateBegin  || this.dateBegin;
-    var dateEnd    = params.dateEnd    || this.dateEnd;
-    this.setActive(false)
-  }
 
   this.setDay = function (day) {
     this.day = day
-  }
-
-  this.getHtml = function () {
-    return '<div class="timetable__inner">' +
-              '<div class="timetable__column">' +
-                schoolCollection.getHtml(this.schoolList) +
-              '</div>' +
-              '<div class="timetable__subject">' +
-                '<p class="timetable__subject-theme">' +
-                  this.name +
-                '</p>' +
-                this.tutor.getHtml() +
-              '</div>' +
-              this.classRoom.getHtml() +
-              '<a class="timetable__status">с ' + getTime(this.dateBegin) + ' до ' + getTime(this.dateEnd) + '</a>' +
-            '</div>';
   };
 
-  //TODO for filters
-  this.show = function () {
+  this.setMaterialHref = function (materialHref) {
+    this.materialHref = materialHref;
+  };
 
+  this.show = function () {
+    console.log('SHOW', this.id)
+    var htmlLecture = document.querySelector('.timetable__inner[data-id="' + this.id + '"]');
+
+    if (htmlLecture.classList.contains('timetable__inner--hide')) {
+      htmlLecture.classList.remove('timetable__inner--hide');
+    }
   };
 
   this.hide = function () {
+    var htmlLecture = document.querySelector('.timetable__inner[data-id="' + this.id + '"]');
 
+    if (htmlLecture && !htmlLecture.classList.contains('timetable__inner--hide')) {
+      htmlLecture.classList.add('timetable__inner--hide');
+    }
   };
 }
 
@@ -74,17 +113,7 @@ var lectureCollection = {
   nextId: 0,
   collection: Object.create(null),
 
-  getById : function (id) {
-
-    if (!(this.collection[id] instanceof Lecture)) {
-      throw new TimetableError('Лекции с таким id не существует');
-    }
-
-    return this.collection[id];
-  },
-
-  validateName : function (newName) {
-
+  validateName: function (newName) {
     if (typeof newName !== 'string') {
       throw new TimetableError('Имя лекции должно быть строкой');
     }
@@ -92,29 +121,27 @@ var lectureCollection = {
     if (newName.length === 0) {
       throw new TimetableError('Имя лекции не должно быть пустое');
     }
-
   },
 
-  validateFreeTutor : function (lecture, tutorId, dateBegin, dateEnd, ignoreLectureId) {
+  validateFreeTutor: function (lecture, tutorId, dateBegin, dateEnd, ignoreLectureId) {
     if (lecture.active === false) {
-      return
+      return;
     }
+
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.tutor.id === tutorId && lecture.id !== ignoreLectureId){
-
       if (intersectionDates(dateBegin, dateEnd, lecture.dateBegin, lecture.dateEnd)) {
         throw new TimetableError('C ' + lecture.dateBegin.toISOString() + ' по ' + lecture.dateEnd.toISOString() + ' преподаватель ' + lecture.tutor.name + ' ведёт лекцию ' + lecture.name);
       }
-
     }
-
   },
 
-  validateFreeClassRoom : function (lecture, classRoomId, dateBegin, dateEnd, ignoreLectureId) {
+  validateFreeClassRoom: function (lecture, classRoomId, dateBegin, dateEnd, ignoreLectureId) {
     if (lecture.active === false) {
       return
     }
+
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.classRoom.id === classRoomId && lecture.id !== ignoreLectureId) {
@@ -124,13 +151,13 @@ var lectureCollection = {
       }
 
     }
-
   },
 
-  validateFreeSchool : function (lecture, schoolList, dateBegin, dateEnd, ignoreLectureId) {
+  validateFreeSchool: function (lecture, schoolList, dateBegin, dateEnd, ignoreLectureId) {
     if (lecture.active === false) {
-      return
+      return;
     }
+
     ignoreLectureId = ignoreLectureId || null;
 
     if (lecture.id === ignoreLectureId) {
@@ -138,38 +165,31 @@ var lectureCollection = {
     }
 
     for (var i = 0; i < lecture.schoolList.length; i++) {
-
       if (schoolList.indexOf(lecture.schoolList[i]) >= 0) {
-
         if (intersectionDates(dateBegin, dateEnd, lecture.dateBegin, lecture.dateEnd)) {
           throw new TimetableError('C ' + lecture.dateBegin.toISOString() + ' по ' + lecture.dateEnd.toISOString() + ' школа ' + lecture.schoolList[i].name + ' на лекции ' + lecture.name);
         }
-
       }
-
     }
-
   },
 
-  validateCapacity : function (schoolList, capacity, lecture) {
+  validateCapacity: function (schoolList, capacity, lecture) {
     if (lecture && lecture.active === false) {
-      return
+      return;
     }
+
     var studentsCount = 0;
 
     for (var i = 0; i < schoolList.length; i++) {
       studentsCount += schoolList[i].studentsCount;
-
     }
 
     if (studentsCount > capacity) {
       throw new TimetableError('Аудитория не вмещает данное кол-во студентов');
     }
-
   },
 
-  validateSchoolListId : function (schoolListId) {
-
+  validateSchoolListId: function (schoolListId) {
     if (!Array.isArray(schoolListId)) {
       throw new TimetableError('SchoolListId должен быть массивом');
     }
@@ -196,10 +216,31 @@ var lectureCollection = {
     if (Object.keys(temp).length !== schoolListId.length) {
       throw new TimetableError('SchoolListId не должен содержать повторы');
     }
-
   },
 
-  getSchoolList : function (schoolListId) {
+  validateMaterialHref: function (materialHref, dateEnd) {
+    if (typeof materialHref !== 'string') {
+      throw new TimetableError('materialHref должен быть строкой');
+    }
+
+    if (materialHref.length === 0) {
+      throw new TimetableError('materialHref не должен быть пустым');
+    }
+
+    if (dateEnd.getTime() > new Date().getTime()) {
+      throw new TimetableError('Материалы нельзя опубликовать, лекция еще не завершена. При отсутствии материалов установите значение null');
+    }
+  },
+
+  getById: function (id) {
+    if (!(this.collection[id] instanceof Lecture)) {
+      throw new TimetableError('Лекции с таким id не существует');
+    }
+
+    return this.collection[id];
+  },
+
+  getSchoolList: function (schoolListId) {
     var schoolList = [];
 
     for (var i = 0; i < schoolListId.length; i++) {
@@ -209,7 +250,7 @@ var lectureCollection = {
     return schoolList;
   },
 
-  setName : function (id, newName) {
+  setName: function (id, newName) {
     this.validateName(newName);
     var lecture = this.getById(id);
     lecture.name = newName;
@@ -217,7 +258,7 @@ var lectureCollection = {
     return lecture;
   },
 
-  setTutor : function (id, tutorId) {
+  setTutor: function (id, tutorId) {
     var lecture = this.getById(id);
 
     if (lecture.tutor.id === tutorId){
@@ -235,7 +276,7 @@ var lectureCollection = {
     return lecture;
   },
 
-  setSchoolList : function (id, schoolListId) {
+  setSchoolList: function (id, schoolListId) {
     var lecture = this.getById(id);
     this.validateSchoolListId(schoolListId);
     var schoolList = this.getSchoolList(schoolListId);
@@ -246,10 +287,11 @@ var lectureCollection = {
     }
 
     lecture.setSchoolList(schoolList);
+
     return lecture;
   },
 
-  setClassRoom : function (id, classRoomId) {
+  setClassRoom: function (id, classRoomId) {
     var lecture = this.getById(id);
 
     if (lecture.classRoom.id === classRoomId){
@@ -264,10 +306,11 @@ var lectureCollection = {
     }
 
     lecture.setClassRoom(classRoom);
+
     return true;
   },
 
-  setDates : function (id, dateBegin, dateEnd) {
+  setDate: function (id, dateBegin, dateEnd) {
     var lecture = this.getById(id);
 
     if (lecture.dateBegin.getTime() === dateBegin.getTime() || lecture.dateEnd.getTime() === dateEnd.getTime()) {
@@ -280,13 +323,27 @@ var lectureCollection = {
       this.validateFreeSchool(this.collection[key], lecture.schoolList, dateBegin, dateEnd);
     }
 
-    lecture.setDates(dateBegin, dateEnd);
+    lecture.setDate(dateBegin, dateEnd);
 
     return lecture;
   },
 
-  create : function (name, tutorId, schoolListId, classRoomId, dateBegin, dateEnd) {
+  setMaterialHref: function (id, materialHref) {
+    var lecture = lectureCollection.getById(id);
+
+    this.validateMaterialHref(materialHref, lecture.dateEnd);
+    lecture.setMaterialHref(materialHref);
+
+    return true;
+  },
+
+  create: function (name, tutorId, schoolListId, classRoomId, dateBegin, dateEnd, materialHref) {
     this.validateName(name);
+
+    if (materialHref !== null) {
+      this.validateMaterialHref(materialHref, dateEnd);
+    }
+
     var tutor = tutorCollection.getById(tutorId);
     var classRoom = classRoomCollection.getById(classRoomId);
 
@@ -300,16 +357,15 @@ var lectureCollection = {
       this.validateFreeSchool(this.collection[key], schoolList, dateBegin, dateEnd);
     }
 
-    var lecture = new Lecture (this.nextId.toString(), name, tutor, schoolList, classRoom, dateBegin, dateEnd);
+    var lecture = new Lecture (this.nextId.toString(), name, tutor, schoolList, classRoom, dateBegin, dateEnd, materialHref);
     this.collection[lecture.id] = lecture;
     this.nextId++;
 
     return lecture;
   },
 
-  remove : function (id) {
-    this.getById(id)
-    delete this.collection[id]
-  },
-
+  remove: function (id) {
+    this.getById(id);
+    delete this.collection[id];
+  }
 };

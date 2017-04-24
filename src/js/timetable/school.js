@@ -7,6 +7,14 @@ function School (id, name, studentsCount) {
     return '<p class="timetable__school">' + this.name +'</p>'
   };
 
+  this.toJSON = function () {
+    return {
+      'id': this.id,
+      'name': this.name,
+      'studentsCount': this.studentsCount
+    }
+  };
+
   this.setName = function(newName) {
     this.name = newName;
   };
@@ -17,11 +25,9 @@ function School (id, name, studentsCount) {
 }
 
 var schoolCollection = {
-
-  collection : Object.create(null),
+  collection: Object.create(null),
 
   validateName: function (newName) {
-
     if (typeof newName !== 'string') {
       throw new TimetableError('Имя должно быть строкой');
     }
@@ -35,11 +41,9 @@ var schoolCollection = {
         throw new TimetableError('Школа с таким именем уже существует');
       }
     }
-
   },
 
   validateStudentsCount: function (newStudentsCount) {
-
     if (!isNaturalNum(newStudentsCount)) {
       throw new TimetableError('Количество студентов должно быть числом');
     }
@@ -47,16 +51,24 @@ var schoolCollection = {
     if (newStudentsCount <= 0) {
       throw new TimetableError('Количество студентов должно быть больше 0');
     }
-
   },
 
   getById: function (id) {
-
     if (!(this.collection[id] instanceof School)) {
       throw new TimetableError('Такого id не существует');
     }
 
     return this.collection[id];
+  },
+
+  getHtml: function (schoolList) {
+    var html = '';
+
+    for (var i = 0; i < schoolList.length; i++) {
+      html += schoolList[i].getHtml();
+    }
+
+    return html;
   },
 
   setName: function (id, newName) {
@@ -78,6 +90,7 @@ var schoolCollection = {
     }
 
     school.setStudentsCount(newStudentsCount);
+
     return true;
   },
 
@@ -88,15 +101,5 @@ var schoolCollection = {
     this.collection[id] = new School(id, name, studentsCount);
 
     return true;
-  },
-
-  getHtml : function (schoolList) {
-    var html = '';
-
-    for (var i = 0; i < schoolList.length; i++) {
-      html += schoolList[i].getHtml();
-    }
-
-    return html;
   }
 };

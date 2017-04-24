@@ -61,33 +61,7 @@
   </div>
   <!-- /Page Wrapper -->
   <script src="js/TimetableAPI.min.js"></script>
-  <script>
-    var startData = {
-      tutorList : [
-        {id: 'ATen', name: 'Антон Тен', about: 'В Яндексе с 2014 года. Ведущий дизайнер продукта в сервисах Переводчик, Расписания и Видео.', img: 'img/AntonTen'},
-        {id: 'DDushkin', name: 'Дмитрий Душкин', about: 'Кандидат технических наук, научный сотрудник ИПУ РАН с 2008 по 2013. Пришёл в Яндекс.Картинки в 2014 году, отвечал за мобильную версию и рост производительности сервиса. В 2016 перешёл в Yandex Data Factory, где разрабатывает интерфейсы и дизайн веб-приложений для B2B.', img: 'img/DmitriyDushkin'}
-      ],
-      classRoomList : [
-        {id: 'BlueWhale', name: 'Синий кит', capacity: 300, location: 'Москва, ул. Льва Толстого, 300'},
-        {id: 'Panda', name: 'Панда', capacity: 100, location: 'Москва, ул. Льва Толстого, 100'},
-        {id: 'Firebird', name: 'Жар-птица', capacity: 200, location: 'Москва, ул. Льва Толстого, 200'},
-
-      ],
-      schoolList : [
-        {id: 'shri', name: 'Школа разработки интерфейсов', studentsCount: 120},
-        {id: 'shd', name: 'Школа мобильного дизайна', studentsCount: 100},
-        {id: 'shmd', name: 'Школа мобильной разработки', studentsCount: 70}
-      ],
-      lectureList : [
-        {name: 'Параллельные и распределённые вычисления', tutorId: 'DDushkin', schoolListId: ['shri', 'shmd'], classRoomId: 'Firebird', dateBeginStr: '2017-04-10T10:00:00Z', dateEndStr: '2017-04-10T13:00:00Z'},
-        {name: 'Идея, исследование, концепт (Часть 1)', tutorId: 'ATen', schoolListId: ['shd'], classRoomId: 'Panda', dateBeginStr: '2017-04-10T10:00:00Z', dateEndStr: '2017-04-10T13:00:00Z'},
-        {name: 'Параллельные и распределённые вычисления (Часть 2)', tutorId: 'DDushkin', schoolListId: ['shri', 'shmd'], classRoomId: 'Firebird', dateBeginStr: '2017-04-10T13:10:00Z', dateEndStr: '2017-04-10T15:10:00Z'},
-      ]
-    };
-
-    timetable.init(startData);
-  </script>
-<script src="js/popup.min.js"></script>
+  <script src="js/popup.min.js"></script>
 
 </body>
 
