@@ -5,31 +5,100 @@
 
 // Лектор
 - dayCollection.tutor.add(id, name, about, img) - добавление преподавателя
+	id - string, id преподавателя;
+	name - string, имя преподавателя;
+	about - string, о преподавателе;
+	img - string, название фото.
 
 // Школы
 - dayCollection.school.add(id, name, studentsCount) - добавление школы
+	id - string, id школы;
+	name - string, название школы;
+	studentsCount - number, кол-во студентов в школе.
+	
 - dayCollection.school.setStudentsCount(id, newStudentsCount) - изменение кол-ва студентов
+	id - string, id школы;
+	newStudentsCount - number, новое кол-во студентов в школе.
+	
 - dayCollection.school.setName(id, newName) - изменение названия школы
+	id - string, id школы;
+	newName - string, новое название школы.
 
 // Аудитории
 - dayCollection.classRoom.add(id, name, capacity, location) - добавление аудитории
+	id - string, id аудитории;
+	name - string, название аудитории;
+	capacity - number, вместительность аудитории;
+	location - string, расположение аудитории.
+	
 - dayCollection.classRoom.setName(id, newName) - изменение названия аудитории
+	id - string, id аудитории;
+	newName - string, новое название аудитории.
+	
 - dayCollection.classRoom.setCapacity(id, newCapacity) - изменение вместимости аудитории
+	id - string, id аудитории;
+	newCapacity - number, новая вместительность аудитории.
+	
 - dayCollection.classRoom.setLocation(id, newLocation) - изменение расположения аудитории
+	id - string, id аудитории;
+	newLocation - string, новое расположение аудитории.
 
 // Лекции
 - dayCollection.addLecture(name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr, materialHref) - добавление лекции
-- dayCollection.setLectureName(lectureId, newName) - изменение названия лекции
-- dayCollection.setLectureTutor(lectureId, tutorId) - изменение преподавателя лекции
-- dayCollection.setLectureSchoolList(lectureId, schoolListId) - изменение школ на лекции
-- dayCollection.setLectureClassRoom(lectureId, classRoomId) - изменение места проведения лекции (аудитории)
-- dayCollection.setLectureDate(lectureId, dateBeginStr, dateEndStr) - изменение даты лекции
-- dayCollection.setLectureMaterial(id, materialHref) - изменение ссылки на материалы лекции
-- dayCollection.setAllParams(lectureId, name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr) - изменение всех параметров
+	name - string, название лекции;
+	tutorId - string, id преподавателя;
+	schoolListId - array[string], массив id школ;
+	classRoomId - string, id аудитории;
+	dateBeginStr - string, дата начала лекции;
+	dateEndStr - string, дата конца лекции;
+	materialHref - string/null, ссылка на материалы лекции, если их нет, то null.
 
+- dayCollection.setLectureName(lectureId, newName) - изменение названия лекции
+	lectureId - string, id лекции;
+	newName - string, новое название лекции.
+
+- dayCollection.setLectureTutor(lectureId, tutorId) - изменение преподавателя лекции
+	lectureId - string, id лекции;
+	tutorId - string, id преподавателя.
+
+- dayCollection.setLectureSchoolList(lectureId, schoolListId) - изменение школ на лекции
+	lectureId - string, id лекции;
+	schoolListId - array[string], массив id школ.
+
+- dayCollection.setLectureClassRoom(lectureId, classRoomId) - изменение места проведения лекции (аудитория)
+	lectureId - string, id лекции;
+	classRoomId - string, id аудитории.
+	
+- dayCollection.setLectureDate(lectureId, dateBeginStr, dateEndStr) - изменение даты лекции
+	lectureId - string, id лекции;	
+	dateBeginStr - string, новая дата начала лекции;
+	dateEndStr - string, новая дата конца лекции;
+	
+- dayCollection.setLectureMaterial(id, materialHref) - изменение ссылки на материалы лекции
+	lectureId - string, id лекции;
+	materialHref - string/null, ссылка на материалы лекции, если их нет, то null. 
+	
+- dayCollection.setAllParams(lectureId, name, tutorId, schoolListId, classRoomId, dateBeginStr, dateEndStr, materialHref) - изменение всех параметров
+	lectureId - string, id лекции;
+	name - string, новое имя лекции;
+	tutorId - string, id преподавателя;
+	schoolListId - array[string], массив id школ;
+	classRoomId - string, id аудитории;
+	dateBeginStr - string, дата начала лекции;
+	dateEndStr - string, дата конца лекции;
+	materialHref - string/null, ссылка на материалы лекции, если их нет, то null.
+	
 // Фильтры
 - dayCollection.filterByClassRoomAndDates(classRoomId, dateBeginStr, dateEndStr) - показать лекции в аудитории за определенный период
+	classRoomId - string, id аудитории;
+	dateBeginStr - string, дата начала диапазона;
+	dateEndStr - string, дата конца диапазона.
+
 - dayCollection.filterBySchoolAndDates(schoolId, dateBeginStr, dateEndStr) - показать лекции школы за определенный период
+	schoolId - string, id школы;
+	dateBeginStr - string, дата начала диапазона;
+	dateEndStr - string, дата конца диапазона.
+	
 - dayCollection.cancelFilter() - отменить фильтры
 
 // Получить всю информацию о расписании
