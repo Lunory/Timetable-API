@@ -1,5 +1,7 @@
 # API для работы с расписанием
 
+[Пример работы с API](https://github.com/Lunory/Timetable-API/tree/master/src)
+
    Структура:
    - `src/` — исходные фалы проекта
    - `build/` — собранный проект
